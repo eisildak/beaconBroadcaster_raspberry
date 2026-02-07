@@ -1,158 +1,354 @@
-# Beacon Broadcaster Pro
+# 🎯 Beacon Broadcaster with Raspberry Pi
 
-![Platform](https://img.shields.io/badge/platform-macOS-blue)
-![SwiftUI](https://img.shields.io/badge/SwiftUI-5.0+-blue)
+![Platform](https://img.shields.io/badge/platform-Raspberry_Pi-red)
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![Flask](https://img.shields.io/badge/Flask-3.x-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**Professional iBeacon broadcaster for macOS - Now with Menu Bar integration**
+**Professional iBeacon broadcaster for Raspberry Pi with modern web interface**
 
-Beacon Broadcaster Pro is a native macOS application designed for mobile developers and QA engineers to simulate BLE beacon signals directly from Mac computers. Built with SwiftUI and modern macOS features.
+Real iBeacon broadcasting solution that actually works! Control multiple beacons from your browser with automatic deployment for any Raspberry Pi.
 
-## ✨ Features
+---
 
-- 🎯 **Menu Bar App** - Runs quietly in the background, accessible from the macOS menu bar
-- 🔄 **Multiple Beacon Management** - Create and manage multiple beacon configurations
-- ⚙️ **Full Customization** - Configure UUID, Major, Minor values and TX Power
-- ⚡ **Instant Broadcasting** - Start/stop beacon advertising with a single click
-- 💾 **Persistent Storage** - Automatically saves all beacon configurations
-- 🎨 **Native macOS UI** - Beautiful SwiftUI interface with Dark Mode support
-- ✅ **Form Validation** - Real-time validation for all beacon parameters
-- 📊 **Status Indicators** - Visual feedback for broadcasting status
-- 🔍 **Search & Filter** - Quick search through beacon configurations
+## ⭐ Key Features
 
-## 🚀 Use Cases
+- 🚀 **One-Click Auto Deployment** - Browser-based installer, no manual steps
+- 🌐 **Modern Web UI** - Control beacons from any device on your network
+- 📡 **Real iBeacon Broadcasting** - Visible to all iOS/Android scanner apps
+- 💾 **Beacon Presets** - Save and manage multiple beacon configurations
+- 🔄 **Instant Enable/Disable** - Start/stop beacons with one click
+- 👥 **Universal Setup** - Anyone can use with their own Raspberry Pi
+- ✅ **Appium Compatible** - All existing test automation continues working
+- 🔒 **Safe Deployment** - Automatic backups, easy rollback
 
-- Testing location-based triggers in mobile applications
-- QA validation of proximity features  
-- Bluetooth Low Energy (BLE) experimentation
-- iBeacon protocol development
-- Indoor positioning system testing
+---
+
+## 🚀 Quick Start (3 Steps!)
+
+### Step 1: Clone Repository
+
+```bash
+git clone https://github.com/yourusername/beacon-broadcaster-raspberry-pi.git
+cd beacon-broadcaster-raspberry-pi
+```
+
+### Step 2: Install Flask
+
+```bash
+pip3 install flask
+```
+
+### Step 3: Launch Auto Deployer
+
+```bash
+cd raspberry-pi-web-ui
+python3 auto-deployer.py
+```
+
+Then open `http://localhost:5000` in your browser and click deploy!
+
+**That's it!** ☕ Grab a coffee while it deploys automatically.
+
+### Alternative: Setup Wizard (No Python Required)
+
+🔗 **Try it online:** [Setup Wizard on GitHub Pages](https://yourusername.github.io/beacon-broadcaster/setup-wizard.html)
+
+Or use locally:
+```bash
+open raspberry-pi-web-ui/setup-wizard.html
+```
+
+1. Enter your Raspberry Pi credentials
+2. Click "Generate Deployment Package"
+3. Download files and run deploy script
+
+---
+
+## ❓ FAQ
+
+### Can I use this without the repo on Raspberry Pi?
+
+**Yes!** Both methods create everything automatically:
+
+- **Auto Deployer**: Uploads all files via SSH - no existing repo needed
+- **Setup Wizard**: Generates complete deployment package from scratch
+
+**Only requirement**: SSH access to your Raspberry Pi. The system handles the rest.
+
+### Does this break existing Appium tests?
+
+**No** - 100% backward compatible:
+- All existing API endpoints unchanged  
+- Original file backed up automatically
+- Easy rollback anytime
+- Test automation continues working
+
+### Can I test without cloning the repo?
+
+**Yes!** Use the GitHub Pages hosted version:
+```
+https://yourusername.github.io/beacon-broadcaster/setup-wizard.html
+```
+
+Runs entirely in browser - no installation needed!
+
+---
+
+## 🌐 GitHub Pages Setup
+
+Host the setup wizard for your team:
+
+1. **Repository Settings** → **Pages**
+2. Set **Source** to `/docs` folder
+3. Save and deploy
+4. Share: `https://yourusername.github.io/beacon-broadcaster/`
+
+The wizard is pure HTML/JavaScript - no server required!
+
+---
+
+## 📱 Web UI Features
+
+### 🎯 Beacon Management
+
+**Add Beacon Presets:**
+- Custom Name (e.g., "Office Entrance", "Meeting Room A")
+- UUID Configuration
+- Major/Minor Values (0-65535)
+- TX Power Settings
+- One-click save to persistent storage
+
+**Manage Beacons:**
+- ▶️ **Enable** - Start broadcasting with one click
+- 🛑 **Stop** - Disable active beacon
+- 🗑️ **Delete** - Remove saved beacon
+- 📊 **Real-time Status** - See which beacon is broadcasting
+- 💾 **Persistent Storage** - Beacons saved even after reboot
+
+### 🌐 Access from Anywhere
+
+- Connect from any device on your network
+- Modern responsive design (works on phone/tablet)
+- Dark mode interface
+- Real-time status updates every 3 seconds
+
+---
+
+## 🔧 Appium Integration
+
+All existing API endpoints work exactly as before! Your test automation continues without any changes.
+
+### Python Example
+
+```python
+import requests
+
+BASE_URL = "http://YOUR_RASPBERRY_PI_IP:8000"
+
+def test_proximity_feature():
+    # Enable beacon before test
+    requests.get(f"{BASE_URL}/beacon/enable/FDA50693-A4E2-4FB1-AFCF-C6EB07647825/100/1")
+    
+    # Run your test
+    # ... test code ...
+    
+    # Disable beacon after test
+    requests.get(f"{BASE_URL}/beacon/disable")
+```
+
+### JavaScript/Node.js Example
+
+```javascript
+const axios = require('axios');
+const BASE_URL = 'http://YOUR_RASPBERRY_PI_IP:8000';
+
+beforeEach(async () => {
+    await axios.get(`${BASE_URL}/beacon/enable/FDA50693-A4E2-4FB1-AFCF-C6EB07647825/100/1`);
+});
+
+afterEach(async () => {
+    await axios.get(`${BASE_URL}/beacon/disable`);
+});
+```
+
+---
+
+## 🎮 Use Cases
+
+- ✅ **Mobile App Testing** - Test location-based features
+- ✅ **QA Automation** - Integrate with Appium/Selenium tests
+- ✅ **Indoor Positioning** - Simulate beacon infrastructure
+- ✅ **Proximity Marketing** - Test beacon campaigns
+- ✅ **Development** - Quick beacon configuration changes
+- ✅ **Demonstration** - Show beacon features to stakeholders
+
+---
 
 ## 📋 Requirements
 
-- macOS 11.0 or later
-- Bluetooth 4.0 (BLE) support
-- Xcode 15+ (for development)
+### Hardware
+- Raspberry Pi (any model with Bluetooth)
+- Already running beacon simulator
+- Network connection
 
-## 🛠️ Installation
+### Software
+- Python 3.x (on your Mac for deployment tool)
+- Flask (`pip3 install flask`)
+- sshpass (`brew install hudochenkov/sshpass/sshpass`) - Optional for auto-deploy
 
-### Build from Source
+---
 
-1. Clone the repository:
+## 👥 Multi-User Support
+
+**Everyone can use with their own Raspberry Pi!**
+
+The setup wizard generates custom deployment packages for each user:
+- Enter YOUR Raspberry Pi IP, username, password
+- Download personalized deployment script
+- Deploy to YOUR Raspberry Pi
+- Access YOUR web UI
+
+Perfect for teams where each person has their own test Raspberry Pi!
+
+---
+
+## 🔒 Safety Features
+
+✅ **Automatic Backups** - Original files backed up before deployment  
+✅ **Easy Rollback** - Restore previous version with one command  
+✅ **Backward Compatible** - All existing Appium APIs unchanged  
+✅ **Non-Destructive** - Existing beacon configurations preserved  
+
+### Rollback Instructions
+
+If you need to revert:
+
 ```bash
-git clone https://github.com/yourusername/beacon-broadcaster-pro.git
-cd beacon-broadcaster-pro
+ssh your_user@your_raspberry_pi_ip
+cd pointr-beacon-simulator
+screen -X -S beacon_simulator quit
+cp simulate_beacon.py.backup_* simulate_beacon.py
+./run_detached.sh
 ```
 
-2. Open in Xcode:
+---
+
+## 📞 API Reference
+
+### Existing Endpoints (Appium-Compatible)
+
 ```bash
-open BeaconBroadcasterPro/BeaconBroadcasterPro.xcodeproj
+# Enable beacon
+GET /beacon/enable/<uuid>/<major>/<minor>?rssi=-59
+
+# Disable beacon
+GET /beacon/disable
+
+# Get current beacon status
+GET /beacon
+
+# USB beacon control (if applicable)
+GET /beacon/usb/enable
+GET /beacon/usb/disable
+GET /beacon/usb
 ```
 
-3. Build and run (⌘R)
+### New Web UI Endpoints
 
-## 📱 Usage
+```bash
+# List saved beacons
+GET /beacon/list
 
-### Menu Bar Mode
-1. Launch the app - it appears in your menu bar with a beacon icon
-2. Click the menu bar icon to access quick controls
-3. Select a beacon to start/stop broadcasting
-4. Click "Open App" for full configuration interface
+# Add beacon preset
+POST /beacon/add
+Body: {"name": "...", "uuid": "...", "major": 1, "minor": 1, "rssi": -59}
 
-### Main Application
-1. Click "Add Beacon" to create a new beacon configuration
-2. Configure UUID, Major, Minor values
-3. Select the beacon from the list
-4. Click "Start Broadcasting"
-5. Use "Stop Broadcasting" when done
+# Delete beacon preset
+DELETE /beacon/delete/<index>
 
-## 🔧 Configuration
+# Web interface
+GET /
+```
 
-The app supports standard iBeacon parameters:
+---
 
-- **UUID**: 128-bit identifier (e.g., `FDA50693-A4E2-4FB1-AFCF-C6EB07647825`)
-- **Major**: 16-bit unsigned integer (0-65535)
-- **Minor**: 16-bit unsigned integer (0-65535)
-- **TX Power**: Transmission power in dBm (-100 to 20)
+## 🐛 Troubleshooting
 
-### Form Validation
-- Real-time UUID format validation
-- Major/Minor range checking
-- TX Power validation
-- Helpful error messages
+### Auto-deployer won't start
 
-## 🏗️ Technical Architecture
+```bash
+# Install Flask
+pip3 install flask
 
-- **SwiftUI** - Modern declarative UI framework
-- **CoreBluetooth** - BLE peripheral management
-- **UserDefaults** - Persistent beacon storage
-- **Combine** - Reactive state management
-- **AppKit** - Menu bar integration (NSStatusBar)
+# Check Python version
+python3 --version  # Should be 3.6+
+```
 
-## 🔐 Permissions
+### Can't connect to Raspberry Pi
 
-This app requires:
-- **Bluetooth Access** - For broadcasting beacon signals
+```bash
+# Test SSH connection
+ssh your_user@your_ip
 
-All permissions are requested through standard macOS privacy prompts.
+# Check if beacon service is running
+ssh your_user@your_ip "screen -list"
+```
 
-## ⚠️ CRITICAL LIMITATION
+### Web UI not accessible
 
-**macOS CANNOT broadcast real iBeacon signals!**
+```bash
+# Check if service is running on Pi
+curl http://YOUR_IP:8000/beacon
 
-Due to macOS CoreBluetooth API restrictions:
-- ❌ **NOT compatible with standard iBeacon scanners/apps**
-- ❌ **Indoor positioning apps WILL NOT detect these signals**
-- ❌ **Location-based triggers WILL NOT work**
-- ❌ Cannot broadcast Apple Manufacturer Data (0x4C00)
-- ❌ CLBeaconRegion broadcasting not available on macOS
-- ✅ Only broadcasts BLE Service UUIDs (detectable by LightBlue/nRF Connect)
+# Restart beacon service
+ssh your_user@your_ip
+cd pointr-beacon-simulator
+screen -X -S beacon_simulator quit
+./run_detached.sh
+```
 
-**This is a macOS operating system limitation, not a bug.**
+---
 
-### ✅ For REAL iBeacon Broadcasting:
-1. **Use iOS** - iPhone/iPad support native iBeacon broadcasting
-2. **Use dedicated beacon hardware** - Physical beacon devices
-3. **Use Raspberry Pi + Linux** - BlueZ stack supports manufacturer data
-4. **Use ESP32/Arduino** - DIY beacon hardware
+## 📖 Documentation
 
-### 🎯 What This App IS Good For:
-- Learning BLE peripheral concepts
-- Testing BLE scanner apps (LightBlue, nRF Connect)
-- Understanding beacon data structures
-- Development/experimentation only
+- **raspberry-pi-web-ui/README.md** - Detailed web UI documentation
+- **raspberry-pi-web-ui/BAŞLANGIÇ_KILAVUZU.md** - Turkish quick start guide
+- **raspberry-pi-web-ui/WEB_UI_DEPLOYMENT.md** - Manual deployment guide
+- **MACOS_PROJECT_BACKUP.md** - Historical macOS attempts (for reference)
 
-## 🧪 Testing
-
-Test with these scanner apps:
-- **LightBlue** (iOS/macOS) - Recommended
-- **nRF Connect** (iOS/Android)
-- **BLE Scanner** (Android)
+---
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+---
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👨‍💻 Author
-
-**Erol** - Mobile QA Engineer & Developer
+---
 
 ## 🙏 Acknowledgments
 
-- Apple Core Bluetooth Framework
-- SwiftUI Team
-- Flutter Beacon Broadcaster inspiration
-
-## 📞 Support
-
-For bugs, feature requests, or questions:
-- Open an issue on GitHub
-- Email: your.email@example.com
+- Flask - Web framework
+- Raspberry Pi Foundation
+- Original beacon simulator: [pointrlabs/ptr-raspberry-pi-beacon-simulator](https://github.com/pointrlabs/ptr-raspberry-pi-beacon-simulator)
 
 ---
 
-**Made with ❤️ for the mobile development community**
+## 👨‍💻 Author
+
+**Erol İşıldak** - Mobile QA Engineer & Developer
+
+Built for the mobile testing community with ❤️
+
+---
+
+**Why Raspberry Pi Instead of macOS?**
+
+macOS 26.1+ blocks BLE peripheral advertising due to security policies. Even with Bleno/HCI access or Swift/CoreBluetooth, beacons are not visible to standard scanner apps. Raspberry Pi with Linux/BlueZ stack broadcasts real iBeacon signals that work with all iOS/Android apps.
+
+See `MACOS_PROJECT_BACKUP.md` for details on macOS limitations.

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi Beacon - Setup Wizard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 min-h-screen">
+    <div class="container mx-auto px-4 py-12 max-w-2xl">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
+                <h1 class="text-4xl font-bold mb-2">🎯 Beacon Broadcaster</h1>
+                <p class="text-blue-100">Setup Wizard - Configure Your Raspberry Pi</p>
+            </div>
+
+            <!-- Form -->
+            <div class="p-8">
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">1</div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Raspberry Pi Information</h2>
+                    </div>
+                    <p class="text-gray-600 ml-13">Enter your SSH connection details</p>
+                </div>
+
+                <form id="setup-form" class="space-y-6">
+                    <!-- Raspberry Pi IP -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Raspberry Pi IP Adresi *
+                        </label>
+                        <input type="text" id="rpi-ip" required
+                               value="192.168.1.180"
+                               placeholder="e.g., 192.168.1.180"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <p class="mt-1 text-sm text-gray-500">Your Raspberry Pi's local network IP address</p>
+                    </div>
+
+                    <!-- SSH Username -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            SSH Username *
+                        </label>
+                        <input type="text" id="rpi-user" required
+                               value="erol"
+                               placeholder="e.g., pi, erol"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <p class="mt-1 text-sm text-gray-500">The username you use to SSH into your Raspberry Pi</p>
+                    </div>
+
+                    <!-- SSH Password -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            SSH Password *
+                        </label>
+                        <input type="password" id="rpi-password" required
+                               value="1234"
+                               placeholder="Your SSH password"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <p class="mt-1 text-sm text-gray-500">Password for SSH connection</p>
+                    </div>
+
+                    <!-- Project Directory -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Project Directory *
+                        </label>
+                        <input type="text" id="rpi-dir" required
+                               value="pointr-beacon-simulator"
+                               placeholder="e.g., pointr-beacon-simulator"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <p class="mt-1 text-sm text-gray-500">Directory name of beacon simulator on Raspberry Pi</p>
+                    </div>
+
+                    <!-- Port -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            API Port
+                        </label>
+                        <input type="number" id="rpi-port"
+                               value="8000"
+                               min="1000" max="65535"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        <p class="mt-1 text-sm text-gray-500">Port where beacon API will run (usually 8000)</p>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button type="submit"
+                            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-lg shadow-lg transform transition hover:scale-105">
+                        ⚙️ Generate Deployment Package
+                    </button>
+                </form>
+            </div>
+
+            <!-- Result Section -->
+            <div id="result-section" class="hidden p-8 bg-gray-50 border-t border-gray-200">
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">✓</div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Ready!</h2>
+                    </div>
+                    <p class="text-gray-600 ml-13">Your deployment files have been generated</p>
+                </div>
+
+                <!-- Instructions -->
+                <div class="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+                    <h3 class="font-bold text-lg mb-3 text-gray-800">📋 Installation Steps</h3>
+                    <ol class="space-y-3 text-sm text-gray-700">
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-blue-600 min-w-6">1.</span>
+                            <span>Download the files below and save them to <code class="bg-gray-100 px-2 py-1 rounded">raspberry-pi-web-ui</code> folder</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-blue-600 min-w-6">2.</span>
+                            <span>Navigate to folder in Terminal: <code class="bg-gray-100 px-2 py-1 rounded">cd raspberry-pi-web-ui</code></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-blue-600 min-w-6">3.</span>
+                            <span>Run deploy script: <code class="bg-gray-100 px-2 py-1 rounded">chmod +x deploy.sh && ./deploy.sh</code></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-blue-600 min-w-6">4.</span>
+                            <span>Open Web UI: <code id="web-url" class="bg-gray-100 px-2 py-1 rounded"></code></span>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Download Buttons -->
+                <div class="space-y-3">
+                    <button onclick="downloadDeployScript()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                        <span>⬇️</span>
+                        <span>Download deploy.sh (Deployment Script)</span>
+                    </button>
+                    <button onclick="downloadIndexHTML()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                        <span>⬇️</span>
+                        <span>Download index-configured.html (Web UI - Configured)</span>
+                    </button>
+                    <button onclick="window.location.reload()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition">
+                        🔄 Create New Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-white text-sm">
+            <p>🎯 Beacon Broadcaster - Universal Setup Wizard</p>
+            <p class="mt-1 text-blue-200">Anyone can use with their own Raspberry Pi</p>
+        </div>
+    </div>
+
+    <script>
+        let config = {};
+
+        document.getElementById('setup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get configuration
+            config = {
+                ip: document.getElementById('rpi-ip').value.trim(),
+                user: document.getElementById('rpi-user').value.trim(),
+                password: document.getElementById('rpi-password').value,
+                dir: document.getElementById('rpi-dir').value.trim(),
+                port: document.getElementById('rpi-port').value.trim()
+            };
+
+            // Show result section
+            document.getElementById('result-section').classList.remove('hidden');
+            document.getElementById('web-url').textContent = `http://${config.ip}:${config.port}`;
+
+            // Scroll to result
+            document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        function downloadDeployScript() {
+            const script = `#!/bin/bash
+
+# 🚀 Raspberry Pi Beacon Broadcaster - Auto-Generated Deployment Script
+# Generated for: ${config.user}@${config.ip}
+# Date: ${new Date().toLocaleString()}
+
+# Colors
+GREEN='\\033[0;32m'
+BLUE='\\033[0;34m'
+YELLOW='\\033[1;33m'
+RED='\\033[0;31m'
+NC='\\033[0m'
+
+echo -e "\${BLUE}╔════════════════════════════════════════╗\${NC}"
+echo -e "\${BLUE}║  Raspberry Pi Beacon - Deployer       ║\${NC}"
+echo -e "\${BLUE}╚════════════════════════════════════════╝\${NC}"
+echo ""
+
+# Configuration (Auto-generated)
+RPI_USER="${config.user}"
+RPI_IP="${config.ip}"
+RPI_DIR="${config.dir}"
+RPI_PORT="${config.port}"
+RPI_ADDR="\${RPI_USER}@\${RPI_IP}"
+BACKUP_SUFFIX=".backup_$(date +%Y%m%d_%H%M%S)"
+
+echo -e "\${YELLOW}📡 Target:\${NC} \${RPI_ADDR}"
+echo -e "\${YELLOW}📁 Directory:\${NC} ~/\${RPI_DIR}"
+echo -e "\${YELLOW}🔌 Port:\${NC} \${RPI_PORT}"
+echo ""
+
+# Check files
+if [ ! -f "index-configured.html" ]; then
+    echo -e "\${RED}❌ Error: index-configured.html not found\${NC}"
+    echo -e "\${YELLOW}Please download it from the setup wizard first\${NC}"
+    exit 1
+fi
+
+if [ ! -f "simulate_beacon.py" ]; then
+    echo -e "\${RED}❌ Error: simulate_beacon.py not found\${NC}"
+    echo -e "\${YELLOW}Please copy it from repository: raspberry-pi-web-ui/simulate_beacon.py\${NC}"
+    exit 1
+fi
+
+echo -e "\${GREEN}1️⃣  Creating backup...\${NC}"
+ssh \${RPI_ADDR} "cp ~/\${RPI_DIR}/simulate_beacon.py ~/\${RPI_DIR}/simulate_beacon.py\${BACKUP_SUFFIX} 2>/dev/null || echo 'No existing file to backup'"
+
+echo -e "\${GREEN}2️⃣  Uploading files...\${NC}"
+scp simulate_beacon.py \${RPI_ADDR}:~/\${RPI_DIR}/
+scp index-configured.html \${RPI_ADDR}:~/\${RPI_DIR}/index.html
+scp beacons_config.json \${RPI_ADDR}:~/\${RPI_DIR}/ 2>/dev/null || echo "[]" | ssh \${RPI_ADDR} "cat > ~/\${RPI_DIR}/beacons_config.json"
+
+echo -e "\${GREEN}3️⃣  Restarting service...\${NC}"
+ssh \${RPI_ADDR} << 'ENDSSH'
+cd ${RPI_DIR}
+screen -X -S beacon_simulator quit 2>/dev/null || true
+sleep 2
+chmod +x simulate_beacon.py run_detached.sh
+./run_detached.sh
+sleep 2
+if screen -list | grep -q "beacon_simulator"; then
+    echo "✅ Service started successfully!"
+else
+    echo "⚠️  Check service: screen -r beacon_simulator"
+fi
+ENDSSH
+
+echo ""
+echo -e "\${GREEN}╔════════════════════════════════════════╗\${NC}"
+echo -e "\${GREEN}║        Deployment Complete! 🎉         ║\${NC}"
+echo -e "\${GREEN}╚════════════════════════════════════════╝\${NC}"
+echo ""
+echo -e "\${BLUE}🌐 Web UI:\${NC} http://\${RPI_IP}:\${RPI_PORT}"
+echo -e "\${BLUE}📡 API:\${NC}    http://\${RPI_IP}:\${RPI_PORT}/beacon"
+echo ""
+echo -e "\${GREEN}✅ Ready to use!\${NC}"
+`;
+
+            downloadFile('deploy.sh', script);
+        }
+
+        function downloadIndexHTML() {
+            fetch('index.html')
+                .then(response => response.text())
+                .then(html => {
+                    // Configure HTML with user's Raspberry Pi IP
+                    const configured = html.replace(
+                        'const API_BASE = window.location.origin;',
+                        `const API_BASE = 'http://${config.ip}:${config.port}';`
+                    ).replace(
+                        '<span id="pi-address">192.168.1.180</span>',
+                        `<span id="pi-address">${config.ip}</span>`
+                    );
+                    
+                    downloadFile('index-configured.html', configured);
+                })
+                .catch(() => {
+                    alert('index.html file not found. Please ensure the file is in the same folder.');
+                });
+        }
+
+        function downloadFile(filename, content) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
