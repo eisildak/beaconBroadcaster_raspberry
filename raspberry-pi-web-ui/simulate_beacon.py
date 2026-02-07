@@ -71,7 +71,7 @@ def start_multiplex_ibeacons(beacons, interface='hci0'):
 		i += 1
 
 def stop_advertisement(interface='hci0'):
-	global multiplex_running, current_beacon
+	global multiplex_running, current_beacon, multiplex_beacons
 	multiplex_running = False
 	current_beacon = None
 	multiplex_beacons = None
@@ -128,14 +128,21 @@ def start_api(args):
 	def enable_beacon(uuid, major, minor):
 		"""EXISTING: Enable beacon (Appium-compatible)"""
 		rssi = int(request.args.get('rssi', args.rssi))
-		start_ibeacon(uuid, major, minor, rssi, args.interval, args.interval, args.bluetooth_interface)
-		return jsonify({}), 200
+		success = start_ibeacon(uuid, major, minor, rssi, args.interval, args.interval, args.bluetooth_interface)
+		if success:
+			print(f"✅ Beacon enabled: {uuid} (Major: {major}, Minor: {minor}, RSSI: {rssi})")
+			return jsonify({'status': 'enabled', 'uuid': uuid, 'major': major, 'minor': minor, 'rssi': rssi}), 200
+		else:
+			print(f"❌ Failed to enable beacon: {uuid}")
+			return jsonify({'error': 'Failed to start beacon broadcasting'}), 500
 		
 	@app.route('/beacon/disable', methods=['GET'])
 	def disable_beacon():
 		"""EXISTING: Disable beacon (Appium-compatible)"""
+		print("🛑 Stopping beacon...")
 		stop_advertisement(args.bluetooth_interface)
-		return jsonify({}), 200
+		print("✅ Beacon stopped")
+		return jsonify({'status': 'disabled'}), 200
 	
 	@app.route('/beacon', methods=['GET'])
 	def get_beacon():

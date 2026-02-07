@@ -286,35 +286,45 @@
         // Enable beacon
         async function enableBeacon(index) {
             const beacon = savedBeacons[index];
+            console.log('Enabling beacon:', beacon);
             try {
                 const response = await fetch(
                     `${API_BASE}/beacon/enable/${beacon.uuid}/${beacon.major}/${beacon.minor}?rssi=${beacon.rssi}`
                 );
+                console.log('Enable response:', response.status);
                 if (response.ok) {
                     await checkCurrentBeacon();
+                    renderBeacons(); // Update beacons list UI
+                    console.log('Beacon enabled successfully');
                 } else {
-                    alert('Failed to enable beacon');
+                    const errorText = await response.text();
+                    console.error('Enable failed:', errorText);
+                    alert('Failed to enable beacon: ' + response.status);
                 }
             } catch (error) {
                 console.error('Failed to enable beacon:', error);
-                alert('Failed to enable beacon');
+                alert('Failed to enable beacon: ' + error.message);
             }
         }
 
         // Stop beacon
         async function stopBeacon() {
+            console.log('Stopping beacon...');
             try {
                 const response = await fetch(`${API_BASE}/beacon/disable`);
+                console.log('Stop response:', response.status);
                 if (response.ok) {
-                    currentBeacon = null;
-                    updateCurrentBeaconUI();
-                    renderBeacons();
+                    await checkCurrentBeacon(); // Refresh from server
+                    renderBeacons(); // Update beacons list UI
+                    console.log('Beacon stopped successfully');
                 } else {
-                    alert('Failed to stop beacon');
+                    const errorText = await response.text();
+                    console.error('Stop failed:', errorText);
+                    alert('Failed to stop beacon: ' + response.status);
                 }
             } catch (error) {
                 console.error('Failed to stop beacon:', error);
-                alert('Failed to stop beacon');
+                alert('Failed to stop beacon: ' + error.message);
             }
         }
 
