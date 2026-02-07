@@ -68,9 +68,16 @@
         .info-btn {
             position: relative;
             cursor: help;
+            flex-shrink: 0;
         }
         label {
             cursor: default !important;
+            pointer-events: none;
+        }
+        label + input,
+        label + button,
+        input {
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -99,28 +106,32 @@
                 <form id="setup-form" class="space-y-6">
                     <!-- Raspberry Pi IP -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                            Raspberry Pi IP Adresi *
+                        <div class="flex items-center gap-2 mb-2">
+                            <label for="rpi-ip" class="block text-sm font-medium text-gray-700">
+                                Raspberry Pi IP Adresi *
+                            </label>
                             <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
                                 ?
                                 <div class="info-tooltip tooltip-bottom">
                                     <strong class="block mb-1">📍 Finding Your Raspberry Pi IP Address:</strong>
                                     Open terminal on your Raspberry Pi and run:
                                     <code class="block bg-black/30 px-2 py-1 rounded mt-2 mb-2 font-mono text-xs">hostname -I</code>
-                                    Or check connected devices in your router settings. Usually in <strong>192.168.1.X</strong> format.
+                                    Or check connected devices in your router settings.
                                 </div>
                             </button>
-                        </label>
+                        </div>
                         <input type="text" id="rpi-ip" required
                                value=""
-                               placeholder="e.g., 192.168.1.180"
+                               placeholder="e.g., 192.1xx.x.xxx"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
 
                     <!-- SSH Username -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                            SSH Username *
+                        <div class="flex items-center gap-2 mb-2">
+                            <label for="rpi-user" class="block text-sm font-medium text-gray-700">
+                                SSH Username *
+                            </label>
                             <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
                                 ?
                                 <div class="info-tooltip tooltip-bottom">
@@ -129,42 +140,22 @@
                                     <br><br>
                                     <strong>Default value:</strong> <code class="bg-black/30 px-2 py-0.5 rounded">pi</code>
                                     <br><br>
-                                    If you set a custom name during setup (e.g., erol, admin), enter that.
+                                    If you set a custom name during setup (e.g., admin), enter that.
                                 </div>
                             </button>
-                        </label>
+                        </div>
                         <input type="text" id="rpi-user" required
                                value=""
                                placeholder="e.g., pi"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
 
-                    <!-- SSH Password -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                            SSH Password *
-                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
-                                ?
-                                <div class="info-tooltip tooltip-bottom">
-                                    <strong class="block mb-1">🔒 SSH Password:</strong>
-                                    The password you set when you first installed your Raspberry Pi.
-                                    <br><br>
-                                    <strong>Default password:</strong> <code class="bg-black/30 px-2 py-0.5 rounded">raspberry</code>
-                                    <br><br>
-                                    ⚠️ For security, you should have changed the default password. Enter the password you set during installation.
-                                </div>
-                            </button>
-                        </label>
-                        <input type="password" id="rpi-password" required
-                               value=""
-                               placeholder="Your SSH password"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                    </div>
-
                     <!-- Project Directory -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                            Project Directory *
+                        <div class="flex items-center gap-2 mb-2">
+                            <label for="rpi-dir" class="block text-sm font-medium text-gray-700">
+                                Project Directory *
+                            </label>
                             <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
                                 ?
                                 <div class="info-tooltip tooltip-top">
@@ -176,7 +167,7 @@
                                     This folder will be created automatically.
                                 </div>
                             </button>
-                        </label>
+                        </div>
                         <input type="text" id="rpi-dir" required
                                value="pointr-beacon-simulator"
                                placeholder="e.g., pointr-beacon-simulator"
@@ -185,8 +176,10 @@
 
                     <!-- Port -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                            API Port
+                        <div class="flex items-center gap-2 mb-2">
+                            <label for="rpi-port" class="block text-sm font-medium text-gray-700">
+                                API Port
+                            </label>
                             <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
                                 ?
                                 <div class="info-tooltip tooltip-top">
@@ -198,7 +191,7 @@
                                     ⚠️ <strong>Don't change this unless you specifically modified it.</strong> If you're using a different port (e.g., 5000, 3000), enter that value.
                                 </div>
                             </button>
-                        </label>
+                        </div>
                         <input type="number" id="rpi-port"
                                value="8000"
                                min="1000" max="65535"
@@ -223,7 +216,7 @@
                     <p class="text-gray-600 ml-13 mb-3">Your deployment files have been generated</p>
                     <div class="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 rounded p-3 ml-13">
                         <span>⏱️</span>
-                        <p><strong>Note:</strong> After running the command in the terminal, wait a few seconds to enter the password when prompted.</p>
+                        <p><strong>Note:</strong> You'll be prompted for your SSH password once. Wait a few seconds after entering it.</p>
                     </div>
                 </div>
 
@@ -261,7 +254,7 @@
                     </div>
                     <div class="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 rounded p-2">
                         <span>⏱️</span>
-                        <p><strong>Note:</strong> After running the command in the terminal, wait a few seconds to enter the password when prompted.</p>
+                        <p><strong>Note:</strong> You'll be prompted for your SSH password once. Wait a few seconds after entering it.</p>
                     </div>
                 </div>
 
@@ -323,7 +316,6 @@
             config = {
                 ip: document.getElementById('rpi-ip').value.trim(),
                 user: document.getElementById('rpi-user').value.trim(),
-                password: document.getElementById('rpi-password').value,
                 dir: document.getElementById('rpi-dir').value.trim(),
                 port: document.getElementById('rpi-port').value.trim()
             };
@@ -342,8 +334,8 @@
         });
 
         function generateOneLinerCommand(config, webUiUrl) {
-            // Create one-line deployment command
-            const oneLiner = `curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/simulate_beacon.py | ssh ${config.user}@${config.ip} "cat > ~/${config.dir}/simulate_beacon.py" && curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/index.html | ssh ${config.user}@${config.ip} "cat > ~/${config.dir}/index.html" && ssh ${config.user}@${config.ip} "cd ${config.dir} && screen -X -S beacon_simulator quit 2>/dev/null; chmod +x run_detached.sh && ./run_detached.sh && sleep 2" && echo "✅ Deployment complete! Opening Web UI..." && (open ${webUiUrl} 2>/dev/null || xdg-open ${webUiUrl} 2>/dev/null || start ${webUiUrl} 2>/dev/null)`;
+            // Create one-line deployment command with single SSH session
+            const oneLiner = `ssh ${config.user}@${config.ip} "mkdir -p ${config.dir} && curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/simulate_beacon.py > ${config.dir}/simulate_beacon.py && curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/index.html > ${config.dir}/index.html && cd ${config.dir} && screen -X -S beacon_simulator quit 2>/dev/null; chmod +x run_detached.sh 2>/dev/null; nohup python3 simulate_beacon.py --port ${config.port} > /dev/null 2>&1 &" && sleep 3 && echo "✅ Deployment complete! Opening Web UI..." && (open ${webUiUrl} 2>/dev/null || xdg-open ${webUiUrl} 2>/dev/null || start ${webUiUrl} 2>/dev/null)`;
             
             document.getElementById('one-liner-command').textContent = oneLiner;
         }
@@ -351,7 +343,7 @@
         function copyOneLiner() {
             const command = document.getElementById('one-liner-command').textContent;
             navigator.clipboard.writeText(command).then(() => {
-                alert('✅ Command copied! Paste in terminal to deploy.');
+                alert('✅ Command copied! Paste in terminal to deploy.\n\n⏱️ Note: You\'ll be prompted for your SSH password once. Wait a few seconds after entering it.');
             }).catch(() => {
                 // Fallback for older browsers
                 const textArea = document.createElement('textarea');
@@ -360,7 +352,7 @@
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
-                alert('✅ Command copied! Paste in terminal to deploy.');
+                alert('✅ Command copied! Paste in terminal to deploy.\n\n⏱️ Note: You\'ll be prompted for your SSH password once. Wait a few seconds after entering it.');
             });
         }
 
