@@ -216,7 +216,7 @@
                     <p class="text-gray-600 ml-13 mb-3">Your deployment files have been generated</p>
                     <div class="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 rounded p-3 ml-13">
                         <span>⏱️</span>
-                        <p><strong>Note:</strong> You'll be prompted for your SSH password once. Wait a few seconds after entering it.</p>
+                        <p><strong>Note:</strong> After pasting the command, you'll need to enter your Raspberry Pi password. Wait a few seconds for the prompt.</p>
                     </div>
                 </div>
 
@@ -254,7 +254,7 @@
                     </div>
                     <div class="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 rounded p-2">
                         <span>⏱️</span>
-                        <p><strong>Note:</strong> You'll be prompted for your SSH password once. Wait a few seconds after entering it.</p>
+                        <p><strong>Note:</strong> After pasting the command, you'll need to enter your Raspberry Pi password. Wait a few seconds for the prompt.</p>
                     </div>
                 </div>
 
@@ -343,7 +343,7 @@
         function copyOneLiner() {
             const command = document.getElementById('one-liner-command').textContent;
             navigator.clipboard.writeText(command).then(() => {
-                alert('✅ Command copied! Paste in terminal to deploy.\n\n⏱️ Note: You\'ll be prompted for your SSH password once. Wait a few seconds after entering it.');
+                alert('✅ Command copied! Paste in terminal to deploy.\n\n⏱️ Note: After pasting the command, you\'ll need to enter your Raspberry Pi password. Wait a few seconds for the prompt.');
             }).catch(() => {
                 // Fallback for older browsers
                 const textArea = document.createElement('textarea');
@@ -352,7 +352,7 @@
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
-                alert('✅ Command copied! Paste in terminal to deploy.\n\n⏱️ Note: You\'ll be prompted for your SSH password once. Wait a few seconds after entering it.');
+                alert('✅ Command copied! Paste in terminal to deploy.\n\n⏱️ Note: After pasting the command, you\'ll need to enter your Raspberry Pi password. Wait a few seconds for the prompt.');
             });
         }
 

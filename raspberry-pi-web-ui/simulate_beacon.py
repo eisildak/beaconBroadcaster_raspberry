@@ -63,22 +63,16 @@ def start_ibeacon(uuid, major, minor, rssi=-59, min_interval=100, max_interval=1
 multiplex_running = False
 multiplex_beacons = None
 def start_multiplex_ibeacons(beacons, interface='hci0'):
-	global multiplex_running, multiplex_beacons, active_beacons
+	global multiplex_running, multiplex_beacons
 	multiplex_running = True
 	multiplex_beacons = beacons
 	i = 0
-	while multiplex_running and len(active_beacons) > 0:
-		# Check flag before starting each beacon
-		if not multiplex_running or len(active_beacons) == 0:
-			break
-			
-		j = i % len(active_beacons)
-		beacon = active_beacons[j]
+	while multiplex_running:
+		j = i % len(beacons)
+		beacon = beacons[j]
 		start_ibeacon(beacon["uuid"], beacon["major"], beacon["minor"], beacon.get("rssi", -69), 100, 100, interface)
 		time.sleep(4*100/1000)
 		i += 1
-	
-	print("\u26d4 Multiplex thread stopped")
 
 def stop_advertisement(interface='hci0'):
 	global multiplex_running, current_beacon, multiplex_beacons, active_beacons
@@ -173,11 +167,16 @@ def start_api(args):
 			print(f"📡 Starting multiplex broadcast with {len(active_beacons)} beacons...")
 			multiplex_thread = threading.Thread(
 				target=start_multiplex_ibeacons, 
-			args=(active_beacons, args.bluetooth_interface)
-		)
-		multiplex_thread.daemon = True
-		multiplex_thread.start()
+				args=(active_beacons, args.bluetooth_interface),
+				daemon=True
+			)
+			multiplex_thread.start()
 		
+		return jsonify({'status': 'enabled', 'beacons': active_beacons}), 200
+		
+	@app.route('/beacon/disable', methods=['GET'])
+	def disable_beacon():
+		"""EXISTING: Disable ALL beacons (Appium-compatible)"""
 		global active_beacons, multiplex_running
 		print("🛑 Stopping all beacons...")
 		
@@ -228,11 +227,16 @@ def start_api(args):
 			print(f"📡 Restarting multiplex with {len(active_beacons)} beacons...")
 			multiplex_thread = threading.Thread(
 				target=start_multiplex_ibeacons, 
-				args=(active_beacons, args.bluetooth_interface)
+				args=(active_beacons, args.bluetooth_interface),
+				daemon=True
 			)
-			multiplex_thread.daemon = True
 			multiplex_thread.start()
-			
+		
+		return jsonify({'status': 'disabled', 'beacons': active_beacons}), 200
+	
+	@app.route('/beacon', methods=['GET'])
+	def get_beacon():
+		"""EXISTING: Get current beacon(s) (Appium-compatible) - Now returns all active beacons"""
 		return jsonify(active_beacons), 200
 		
 	@app.route('/beacon/usb/disable', methods=['GET'])
