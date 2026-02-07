@@ -100,6 +100,16 @@ https://eisildak.github.io/beaconBroadcaster_raspberry/setup-wizard.html
 
 Runs entirely in browser - no installation needed!
 
+### Is my data private and secure?
+
+**Yes!** Your sensitive information is protected:
+- ✅ SSH credentials never leave your browser
+- ✅ IP addresses and passwords are NOT stored in the repository
+- ✅ `beacons_config.json` (your beacon data) is gitignored
+- ✅ All sensitive files automatically excluded from version control
+
+**Safe to fork:** The `.gitignore` file ensures your private configuration stays local.
+
 ---
 
 ## 🌐 GitHub Pages Setup

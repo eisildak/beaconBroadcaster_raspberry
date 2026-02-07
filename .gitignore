@@ -137,3 +137,16 @@ pids
 # Environment variables
 .env
 .env.local
+
+# Runtime Configuration Files (user-specific beacon data)
+# Note: These are auto-created by the app - safe to ignore
+beacons_config.json
+raspberry-pi-web-ui/beacons_config.json
+
+# Private SSH Keys (if accidentally added)
+*.pem
+id_rsa
+id_rsa.pub
+
+# Editor & IDE specific (optional)
+.vscode/settings.json
