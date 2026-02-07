@@ -63,16 +63,22 @@ def start_ibeacon(uuid, major, minor, rssi=-59, min_interval=100, max_interval=1
 multiplex_running = False
 multiplex_beacons = None
 def start_multiplex_ibeacons(beacons, interface='hci0'):
-	global multiplex_running, multiplex_beacons
+	global multiplex_running, multiplex_beacons, active_beacons
 	multiplex_running = True
 	multiplex_beacons = beacons
 	i = 0
-	while multiplex_running:
-		j = i % len(beacons)
-		beacon = beacons[j]
+	while multiplex_running and len(active_beacons) > 0:
+		# Double-check before each iteration
+		if not multiplex_running or len(active_beacons) == 0:
+			break
+			
+		j = i % len(active_beacons)
+		beacon = active_beacons[j]
 		start_ibeacon(beacon["uuid"], beacon["major"], beacon["minor"], beacon.get("rssi", -69), 100, 100, interface)
 		time.sleep(4*100/1000)
 		i += 1
+	
+	print("⛔ Multiplex thread stopped")
 
 def stop_advertisement(interface='hci0'):
 	global multiplex_running, current_beacon, multiplex_beacons, active_beacons
@@ -211,12 +217,13 @@ def start_api(args):
 		
 		# Stop current broadcasting
 		multiplex_running = False
-		time.sleep(0.5)
+		time.sleep(0.6)  # Wait for multiplex thread to finish
 		
 		# Restart with remaining beacons
 		if len(active_beacons) == 0:
-			print("✅ No more active beacons")
+			print("✅ No more active beacons - stopping all broadcasts")
 			stop_advertisement(args.bluetooth_interface)
+			time.sleep(0.2)  # Ensure advertisement stops completely
 		elif len(active_beacons) == 1:
 			# Single beacon remaining
 			beacon = active_beacons[0]
