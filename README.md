@@ -44,9 +44,9 @@ Real iBeacon broadcasting solution that actually works! Control multiple beacons
 
 ---
 
-### 🔧 Alternative: Auto Deployer (Advanced Users)
+### 🔧 Alternative: Auto Deployer (Local Deployment)
 
-For developers who prefer running deployment tools locally:
+For developers who prefer running deployment tools locally with instant visual feedback:
 
 **Step 1:** Clone repository
 ```bash
@@ -65,7 +65,10 @@ cd raspberry-pi-web-ui
 python3 auto-deployer.py
 ```
 
-Then open `http://localhost:5000` in your browser and click deploy!
+**Then open `http://localhost:5000` or visit:** `file:///path/to/repo/index.html`  
+(localhost index.html auto-redirects to Auto Deployer)
+
+📤 **Fill in your Raspberry Pi details** → Click Deploy → **Web UI opens automatically!**
 
 ---
 

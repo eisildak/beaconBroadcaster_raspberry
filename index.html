@@ -4,8 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beacon Broadcaster - Setup</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Check if running locally or on GitHub Pages
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Running locally - redirect to Auto Deployer
+            window.location.replace("http://localhost:5000");
+        } else {
+            // Running on GitHub Pages - redirect to setup wizard
+            window.location.replace("setup-wizard.html");
+        }
+    </script>
 </head>
+<body>
+    <p>Loading Beacon Broadcaster Setup...</p>
+</body>
+</html>
 <body class="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 min-h-screen flex items-center justify-center p-4">
     <div class="container max-w-4xl">
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">

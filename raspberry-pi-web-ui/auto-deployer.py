@@ -27,56 +27,71 @@ HTML_TEMPLATE = """
     <div class="container mx-auto px-4 py-12 max-w-2xl">
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
-                <h1 class="text-4xl font-bold mb-2">🚀 Beacon Auto Deployer</h1>
-                <p class="text-blue-100">One-click deployment to your Raspberry Pi</p>
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white text-center">
+                <div class="flex justify-center mb-4">
+                    <img src="assets/play_store_512.png" alt="Beacon Broadcaster" class="w-20 h-20 rounded-lg shadow-lg">
+                </div>
+                <h1 class="text-4xl font-bold mb-2">Beacon Auto Deployer</h1>
+                <p class="text-blue-100 text-lg">One-click deployment to your Raspberry Pi</p>
+                <p class="text-sm text-blue-200 mt-2">✨ Fully automated • Real-time logs • Zero configuration</p>
             </div>
 
             <!-- Form -->
             <div class="p-8">
+                <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p class="text-sm text-blue-800">
+                        <strong>📋 Prerequisites:</strong> SSH access to your Raspberry Pi
+                    </p>
+                </div>
+                
                 <form id="deploy-form" class="space-y-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Raspberry Pi IP Address *
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            📡 Raspberry Pi IP Address *
                         </label>
                         <input type="text" id="rpi-ip" required value="192.168.1.180"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                               placeholder="e.g., 192.168.1.180"
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            SSH Username *
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            👤 SSH Username *
                         </label>
                         <input type="text" id="rpi-user" required value="erol"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                               placeholder="e.g., pi"
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            SSH Password *
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            🔐 SSH Password *
                         </label>
                         <input type="password" id="rpi-password" required value="1234"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                               placeholder="Enter SSH password"
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Project Directory *
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            📁 Project Directory *
                         </label>
                         <input type="text" id="rpi-dir" required value="pointr-beacon-simulator"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                               placeholder="e.g., pointr-beacon-simulator"
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Port
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            🔌 Port
                         </label>
                         <input type="number" id="rpi-port" value="8000" min="1000" max="65535"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                               placeholder="8000"
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
 
                     <button type="submit" id="deploy-btn"
-                            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-lg shadow-lg transform transition hover:scale-105">
+                            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg transform transition hover:scale-105 hover:shadow-xl">
                         🚀 Start Auto Deployment
                     </button>
                 </form>
@@ -84,11 +99,16 @@ HTML_TEMPLATE = """
 
             <!-- Progress Section -->
             <div id="progress-section" class="hidden p-8 bg-gray-50 border-t">
-                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                    <div class="animate-spin w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-                    Deployment in Progress...
-                </h2>
-                <div id="progress-log" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm h-96 overflow-y-auto">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mr-3"></div>
+                    <h2 class="text-2xl font-bold text-gray-800">Deployment in Progress...</h2>
+                </div>
+                <div class="bg-white rounded-lg p-4 mb-4">
+                    <p class="text-sm text-gray-600 text-center">
+                        ☕ This may take 30-60 seconds. Please wait...
+                    </p>
+                </div>
+                <div id="progress-log" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm h-96 overflow-y-auto shadow-inner">
                 </div>
             </div>
 
@@ -96,14 +116,17 @@ HTML_TEMPLATE = """
             <div id="success-section" class="hidden p-8 bg-green-50 border-t border-green-200">
                 <div class="text-center">
                     <div class="text-6xl mb-4">✅</div>
-                    <h2 class="text-3xl font-bold text-green-800 mb-2">Success!</h2>
-                    <p class="text-gray-600 mb-6">Your beacon broadcaster is ready</p>
+                    <h2 class="text-3xl font-bold text-green-800 mb-2">Deployment Successful!</h2>
+                    <p class="text-gray-600 mb-4">Your beacon broadcaster is ready</p>
+                    <div class="bg-blue-100 border border-blue-300 rounded-lg p-4 mb-6">
+                        <p class="text-sm text-blue-800">🚀 Opening Web UI automatically in <span id="countdown">3</span> seconds...</p>
+                    </div>
                     <a id="open-web-ui" href="#" target="_blank"
-                       class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg">
-                        🌐 Open Web UI
+                       class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition transform hover:scale-105">
+                        🌐 Open Web UI Now
                     </a>
                     <button onclick="window.location.reload()"
-                            class="ml-4 inline-block bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">
+                            class="ml-4 inline-block bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition transform hover:scale-105">
                         🔄 New Deployment
                     </button>
                 </div>
@@ -113,10 +136,21 @@ HTML_TEMPLATE = """
             <div id="error-section" class="hidden p-8 bg-red-50 border-t border-red-200">
                 <div class="text-center">
                     <div class="text-6xl mb-4">❌</div>
-                    <h2 class="text-3xl font-bold text-red-800 mb-2">Error!</h2>
-                    <p id="error-message" class="text-gray-600 mb-6"></p>
+                    <h2 class="text-3xl font-bold text-red-800 mb-2">Deployment Failed</h2>
+                    <div class="bg-red-100 border border-red-300 rounded-lg p-4 mb-6">
+                        <p id="error-message" class="text-sm text-red-800 font-mono"></p>
+                    </div>
+                    <div class="text-left bg-white rounded-lg p-4 mb-6 text-sm text-gray-600">
+                        <p class="font-semibold mb-2">💡 Troubleshooting tips:</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Verify Raspberry Pi IP address and SSH credentials</li>
+                            <li>Ensure sshpass is installed: <code class="bg-gray-100 px-2 py-1 rounded">brew install hudochenkov/sshpass/sshpass</code></li>
+                            <li>Check if Raspberry Pi is accessible on the network</li>
+                            <li>Confirm project directory exists on Raspberry Pi</li>
+                        </ul>
+                    </div>
                     <button onclick="window.location.reload()"
-                            class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg">
+                            class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition transform hover:scale-105">
                         🔄 Try Again
                     </button>
                 </div>
@@ -176,7 +210,20 @@ HTML_TEMPLATE = """
                     setTimeout(() => {
                         progressSection.classList.add('hidden');
                         successSection.classList.remove('hidden');
-                        document.getElementById('open-web-ui').href = `http://${config.ip}:${config.port}`;
+                        const webUiUrl = `http://${config.ip}:${config.port}`;
+                        document.getElementById('open-web-ui').href = webUiUrl;
+                        
+                        // Auto-redirect countdown
+                        let countdown = 3;
+                        const countdownEl = document.getElementById('countdown');
+                        const countdownInterval = setInterval(() => {
+                            countdown--;
+                            if (countdownEl) countdownEl.textContent = countdown;
+                            if (countdown <= 0) {
+                                clearInterval(countdownInterval);
+                                window.open(webUiUrl, '_blank');
+                            }
+                        }, 1000);
                     }, 1000);
                 } else {
                     addLog(`❌ Error: ${data.error}`, 'error');
