@@ -303,7 +303,7 @@ def deploy():
             logs.append(f"✓ {local_file} uploaded")
         
         # Restart service
-        logs.append("🔄 Servis yeniden başlatılıyor...")
+        logs.append("🔄 Restarting service...")
         restart_cmd = f"""sshpass -p '{password}' ssh -o StrictHostKeyChecking=no {rpi_addr} '
         cd {directory} && 
         screen -X -S beacon_simulator quit 2>/dev/null || true &&

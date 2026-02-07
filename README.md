@@ -330,9 +330,7 @@ screen -X -S beacon_simulator quit
 ## 📖 Documentation
 
 - **raspberry-pi-web-ui/README.md** - Detailed web UI documentation
-- **raspberry-pi-web-ui/BAŞLANGIÇ_KILAVUZU.md** - Turkish quick start guide
 - **raspberry-pi-web-ui/WEB_UI_DEPLOYMENT.md** - Manual deployment guide
-- **MACOS_PROJECT_BACKUP.md** - Historical macOS attempts (for reference)
 
 ---
 
@@ -367,5 +365,3 @@ Built for the mobile testing community with ❤️
 **Why Raspberry Pi Instead of macOS?**
 
 macOS 26.1+ blocks BLE peripheral advertising due to security policies. Even with Bleno/HCI access or Swift/CoreBluetooth, beacons are not visible to standard scanner apps. Raspberry Pi with Linux/BlueZ stack broadcasts real iBeacon signals that work with all iOS/Android apps.
-
-See `MACOS_PROJECT_BACKUP.md` for details on macOS limitations.
