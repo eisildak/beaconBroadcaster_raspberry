@@ -29,8 +29,8 @@ Real iBeacon broadcasting solution that actually works! Control multiple beacons
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/beacon-broadcaster-raspberry-pi.git
-cd beacon-broadcaster-raspberry-pi
+git clone https://github.com/eisildak/beaconBroadcaster_raspberry.git
+cd beaconBroadcaster_raspberry
 ```
 
 ### Step 2: Install Flask
@@ -52,7 +52,7 @@ Then open `http://localhost:5000` in your browser and click deploy!
 
 ### Alternative: Setup Wizard (No Python Required)
 
-🔗 **Try it online:** [Setup Wizard on GitHub Pages](https://yourusername.github.io/beacon-broadcaster/setup-wizard.html)
+🔗 **Try it online:** [Setup Wizard on GitHub Pages](https://eisildak.github.io/beaconBroadcaster_raspberry/setup-wizard.html)
 
 Or use locally:
 ```bash
@@ -88,7 +88,7 @@ open raspberry-pi-web-ui/setup-wizard.html
 
 **Yes!** Use the GitHub Pages hosted version:
 ```
-https://yourusername.github.io/beacon-broadcaster/setup-wizard.html
+https://eisildak.github.io/beaconBroadcaster_raspberry/setup-wizard.html
 ```
 
 Runs entirely in browser - no installation needed!
@@ -100,9 +100,9 @@ Runs entirely in browser - no installation needed!
 Host the setup wizard for your team:
 
 1. **Repository Settings** → **Pages**
-2. Set **Source** to `/docs` folder
+2. Set **Source** to `main` branch, `/ (root)` folder (or move files from `docs/` to root)
 3. Save and deploy
-4. Share: `https://yourusername.github.io/beacon-broadcaster/`
+4. Share: `https://eisildak.github.io/beaconBroadcaster_raspberry/`
 
 The wizard is pure HTML/JavaScript - no server required!
 
