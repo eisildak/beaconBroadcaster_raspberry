@@ -5,6 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raspberry Pi Beacon - Setup Wizard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(168, 85, 247, 0.5);
+                transform: scale(1.02);
+            }
+        }
+        .pulse-glow-btn {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            background: #1e293b;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            width: 320px;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+        }
+        .info-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-bottom-color: #1e293b;
+        }
+        .info-btn:hover .info-tooltip {
+            display: block;
+        }
+        .info-btn {
+            position: relative;
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 min-h-screen">
     <div class="container mx-auto px-4 py-12 max-w-2xl">
@@ -31,67 +78,115 @@
                 <form id="setup-form" class="space-y-6">
                     <!-- Raspberry Pi IP -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                             Raspberry Pi IP Adresi *
+                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
+                                ?
+                                <div class="info-tooltip">
+                                    <strong class="block mb-1">📍 Raspberry Pi IP Adresinizi Bulma:</strong>
+                                    Raspberry Pi'da terminali açın ve şu komutu çalıştırın:
+                                    <code class="block bg-black/30 px-2 py-1 rounded mt-2 mb-2 font-mono text-xs">hostname -I</code>
+                                    Ya da router ayarlarınızdan bağlı cihazları kontrol edin. Genellikle <strong>192.168.1.X</strong> formatındadır.
+                                </div>
+                            </button>
                         </label>
                         <input type="text" id="rpi-ip" required
                                value="192.168.1.180"
                                placeholder="e.g., 192.168.1.180"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                        <p class="mt-1 text-sm text-gray-500">Your Raspberry Pi's local network IP address</p>
                     </div>
 
                     <!-- SSH Username -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                             SSH Username *
+                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
+                                ?
+                                <div class="info-tooltip">
+                                    <strong class="block mb-1">👤 SSH Kullanıcı Adı:</strong>
+                                    Raspberry Pi'ınızı ilk kurduğunuzda belirlediğiniz kullanıcı adı. 
+                                    <br><br>
+                                    <strong>Varsayılan değer:</strong> <code class="bg-black/30 px-2 py-0.5 rounded">pi</code>
+                                    <br><br>
+                                    Eğer kurulum sırasında özel bir isim verdiyseniz (örn: erol, admin), onu girin.
+                                </div>
+                            </button>
                         </label>
                         <input type="text" id="rpi-user" required
                                value="erol"
                                placeholder="e.g., pi, erol"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                        <p class="mt-1 text-sm text-gray-500">The username you use to SSH into your Raspberry Pi</p>
                     </div>
 
                     <!-- SSH Password -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                             SSH Password *
+                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
+                                ?
+                                <div class="info-tooltip">
+                                    <strong class="block mb-1">🔒 SSH Şifreniz:</strong>
+                                    Raspberry Pi'ınızı ilk kurduğunuzda belirlediğiniz şifre.
+                                    <br><br>
+                                    <strong>Varsayılan şifre:</strong> <code class="bg-black/30 px-2 py-0.5 rounded">raspberry</code>
+                                    <br><br>
+                                    ⚠️ Güvenlik nedeniyle varsayılan şifreyi değiştirmiş olmalısınız. Kurulumda belirlediğiniz şifreyi girin.
+                                </div>
+                            </button>
                         </label>
                         <input type="password" id="rpi-password" required
                                value="1234"
                                placeholder="Your SSH password"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                        <p class="mt-1 text-sm text-gray-500">Password for SSH connection</p>
                     </div>
 
                     <!-- Project Directory -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                             Project Directory *
+                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
+                                ?
+                                <div class="info-tooltip">
+                                    <strong class="block mb-1">📁 Proje Klasör Adı:</strong>
+                                    Beacon simulator dosyalarının Raspberry Pi'da saklanacağı klasör ismi.
+                                    <br><br>
+                                    <strong>Önemli:</strong> Eğer farklı bir klasör ismi kullanıyorsanız değiştirin. Kullanmıyorsanız <strong>varsayılan değeri değiştirmeyin</strong>.
+                                    <br><br>
+                                    Bu klasör otomatik oluşturulacaktır.
+                                </div>
+                            </button>
                         </label>
                         <input type="text" id="rpi-dir" required
                                value="pointr-beacon-simulator"
                                placeholder="e.g., pointr-beacon-simulator"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                        <p class="mt-1 text-sm text-gray-500">Directory name of beacon simulator on Raspberry Pi</p>
                     </div>
 
                     <!-- Port -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                             API Port
+                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
+                                ?
+                                <div class="info-tooltip">
+                                    <strong class="block mb-1">🔌 API Port Numarası:</strong>
+                                    Web arayüzünün çalışacağı port numarası.
+                                    <br><br>
+                                    <strong>Varsayılan:</strong> <code class="bg-black/30 px-2 py-0.5 rounded">8000</code>
+                                    <br><br>
+                                    ⚠️ <strong>Özellikle değiştirmediyseniz bu değeri değiştirmeyin.</strong> Eğer farklı bir port kullanıyorsanız (örn: 5000, 3000) o değeri girin.
+                                </div>
+                            </button>
                         </label>
                         <input type="number" id="rpi-port"
                                value="8000"
                                min="1000" max="65535"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                        <p class="mt-1 text-sm text-gray-500">Port where beacon API will run (usually 8000)</p>
                     </div>
 
                     <!-- Generate Button -->
                     <button type="submit"
-                            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-lg shadow-lg transform transition hover:scale-105">
+                            class="pulse-glow-btn w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-lg transform transition hover:scale-105">
                         ⚙️ Generate Deployment Package
                     </button>
                 </form>
