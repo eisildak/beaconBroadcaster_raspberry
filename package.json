@@ -1,0 +1,28 @@
+{
+  "name": "beacon-broadcaster-deployer",
+  "version": "1.0.0",
+  "description": "Serverless deployment API for Beacon Broadcaster Raspberry Pi",
+  "main": "api/deploy.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "node-ssh": "^13.1.0"
+  },
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "beacon",
+    "ibeacon",
+    "raspberry-pi",
+    "bluetooth",
+    "deployment"
+  ],
+  "author": "",
+  "license": "MIT"
+}

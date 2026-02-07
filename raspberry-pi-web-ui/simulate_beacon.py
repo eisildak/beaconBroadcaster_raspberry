@@ -7,6 +7,7 @@ import time
 import subprocess
 import json
 import os
+import threading
 from flask import Flask, jsonify, request, send_file
 from pathlib import Path
 
@@ -46,6 +47,9 @@ def get_ibeacon_payload(uuid,major,minor, rssi):
 	return ibeacon_payload	
 
 current_beacon = None
+active_beacons = []  # List of currently broadcasting beacons (for multi-beacon support)
+multiplex_thread = None
+
 def start_ibeacon(uuid, major, minor, rssi=-59, min_interval=100, max_interval=100, interface='hci0'):
 	try:
 		restart_ble(interface)
@@ -71,10 +75,11 @@ def start_multiplex_ibeacons(beacons, interface='hci0'):
 		i += 1
 
 def stop_advertisement(interface='hci0'):
-	global multiplex_running, current_beacon, multiplex_beacons
+	global multiplex_running, current_beacon, multiplex_beacons, active_beacons
 	multiplex_running = False
 	current_beacon = None
 	multiplex_beacons = None
+	active_beacons = []
 	time.sleep(1)
 	subprocess.run(['sudo', 'hciconfig', interface, 'down'], check=False)
 
@@ -126,30 +131,105 @@ def start_api(args):
 	
 	@app.route('/beacon/enable/<uuid>/<int:major>/<int:minor>', methods=['GET'])
 	def enable_beacon(uuid, major, minor):
-		"""EXISTING: Enable beacon (Appium-compatible)"""
+		"""EXISTING: Enable beacon (Appium-compatible) - Now supports multi-beacon"""
+		global active_beacons, multiplex_running, multiplex_thread
+		
 		rssi = int(request.args.get('rssi', args.rssi))
-		success = start_ibeacon(uuid, major, minor, rssi, args.interval, args.interval, args.bluetooth_interface)
-		if success:
-			print(f"✅ Beacon enabled: {uuid} (Major: {major}, Minor: {minor}, RSSI: {rssi})")
-			return jsonify({'status': 'enabled', 'uuid': uuid, 'major': major, 'minor': minor, 'rssi': rssi}), 200
+		
+		# Create beacon object
+		new_beacon = {'uuid': uuid, 'major': major, 'minor': minor, 'rssi': rssi}
+		
+		# Check if beacon already active
+		for beacon in active_beacons:
+			if beacon['uuid'] == uuid and beacon['major'] == major and beacon['minor'] == minor:
+				print(f"⚠️  Beacon already active: {uuid} (Major: {major}, Minor: {minor})")
+				return jsonify({'status': 'already_active', 'beacons': active_beacons}), 200
+		
+		# Add to active list
+		active_beacons.append(new_beacon)
+		print(f"✅ Beacon added to active list: {uuid} (Major: {major}, Minor: {minor}, RSSI: {rssi})")
+		print(f"📊 Total active beacons: {len(active_beacons)}")
+		
+		# Stop current broadcasting
+		multiplex_running = False
+		time.sleep(0.5)
+		
+		# Start broadcasting
+		if len(active_beacons) == 1:
+			# Single beacon - direct broadcast
+			print("📡 Starting single beacon broadcast...")
+			success = start_ibeacon(uuid, major, minor, rssi, args.interval, args.interval, args.bluetooth_interface)
+			if not success:
+				active_beacons.remove(new_beacon)
+				return jsonify({'error': 'Failed to start beacon broadcasting'}), 500
 		else:
-			print(f"❌ Failed to enable beacon: {uuid}")
-			return jsonify({'error': 'Failed to start beacon broadcasting'}), 500
+			# Multiple beacons - use multiplex (time-sharing)
+			print(f"📡 Starting multiplex broadcast with {len(active_beacons)} beacons...")
+			multiplex_thread = threading.Thread(
+				target=start_multiplex_ibeacons, 
+				args=(active_beacons.copy(), args.bluetooth_interface),
+				daemon=True
+			)
+			multiplex_thread.start()
+		
+		return jsonify({'status': 'enabled', 'beacons': active_beacons}), 200
 		
 	@app.route('/beacon/disable', methods=['GET'])
 	def disable_beacon():
-		"""EXISTING: Disable beacon (Appium-compatible)"""
-		print("🛑 Stopping beacon...")
+		"""EXISTING: Disable ALL beacons (Appium-compatible)"""
+		global active_beacons
+		print("🛑 Stopping all beacons...")
 		stop_advertisement(args.bluetooth_interface)
-		print("✅ Beacon stopped")
-		return jsonify({'status': 'disabled'}), 200
+		print("✅ All beacons stopped")
+		return jsonify({'status': 'disabled', 'beacons': []}), 200
+	
+	@app.route('/beacon/disable/<uuid>/<int:major>/<int:minor>', methods=['GET'])
+	def disable_specific_beacon(uuid, major, minor):
+		"""NEW: Disable specific beacon (for multi-beacon support)"""
+		global active_beacons, multiplex_running, multiplex_thread
+		
+		# Find and remove beacon
+		beacon_found = False
+		for i, beacon in enumerate(active_beacons):
+			if beacon['uuid'] == uuid and beacon['major'] == major and beacon['minor'] == minor:
+				active_beacons.pop(i)
+				beacon_found = True
+				print(f"🛑 Beacon removed: {uuid} (Major: {major}, Minor: {minor})")
+				break
+		
+		if not beacon_found:
+			print(f"⚠️  Beacon not found in active list: {uuid} (Major: {major}, Minor: {minor})")
+			return jsonify({'status': 'not_found', 'beacons': active_beacons}), 404
+		
+		# Stop current broadcasting
+		multiplex_running = False
+		time.sleep(0.5)
+		
+		# Restart with remaining beacons
+		if len(active_beacons) == 0:
+			print("✅ No more active beacons")
+			stop_advertisement(args.bluetooth_interface)
+		elif len(active_beacons) == 1:
+			# Single beacon remaining
+			beacon = active_beacons[0]
+			print(f"📡 Restarting with single beacon: {beacon['uuid']}")
+			start_ibeacon(beacon['uuid'], beacon['major'], beacon['minor'], beacon['rssi'], args.interval, args.interval, args.bluetooth_interface)
+		else:
+			# Multiple beacons remaining - restart multiplex
+			print(f"📡 Restarting multiplex with {len(active_beacons)} beacons...")
+			multiplex_thread = threading.Thread(
+				target=start_multiplex_ibeacons, 
+				args=(active_beacons.copy(), args.bluetooth_interface),
+				daemon=True
+			)
+			multiplex_thread.start()
+		
+		return jsonify({'status': 'disabled', 'beacons': active_beacons}), 200
 	
 	@app.route('/beacon', methods=['GET'])
 	def get_beacon():
-		"""EXISTING: Get current beacon (Appium-compatible)"""
-		global multiplex_beacons, current_beacon, multiplex_running
-		beacons = multiplex_beacons if multiplex_running else ([current_beacon] if current_beacon else [])
-		return jsonify(beacons), 200
+		"""EXISTING: Get current beacon(s) (Appium-compatible) - Now returns all active beacons"""
+		return jsonify(active_beacons), 200
 		
 	@app.route('/beacon/usb/disable', methods=['GET'])
 	def disable_usb_beacon():

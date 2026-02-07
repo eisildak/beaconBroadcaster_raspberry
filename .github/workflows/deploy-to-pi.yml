@@ -1,0 +1,130 @@
+name: Deploy to Raspberry Pi
+
+on:
+  workflow_dispatch:
+    inputs:
+      raspberry_pi_ip:
+        description: 'Raspberry Pi IP Address'
+        required: true
+        type: string
+      ssh_username:
+        description: 'SSH Username (default: pi)'
+        required: false
+        default: 'pi'
+        type: string
+      project_directory:
+        description: 'Project Directory (default: beacon_broadcaster)'
+        required: false
+        default: 'beacon_broadcaster'
+        type: string
+      ssh_port:
+        description: 'SSH Port (default: 22)'
+        required: false
+        default: '22'
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+      
+      - name: Create project directory on Raspberry Pi
+        env:
+          SSH_PASSWORD: ${{ secrets.RASPBERRY_PI_SSH_PASSWORD }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${{ github.event.inputs.ssh_port }} \
+            ${{ github.event.inputs.ssh_username }}@${{ github.event.inputs.raspberry_pi_ip }} \
+            "mkdir -p ${{ github.event.inputs.project_directory }}"
+      
+      - name: Deploy files to Raspberry Pi
+        env:
+          SSH_PASSWORD: ${{ secrets.RASPBERRY_PI_SSH_PASSWORD }}
+        run: |
+          echo "📦 Deploying files..."
+          
+          # Deploy simulate_beacon.py
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -P ${{ github.event.inputs.ssh_port }} \
+            raspberry-pi-web-ui/simulate_beacon.py \
+            ${{ github.event.inputs.ssh_username }}@${{ github.event.inputs.raspberry_pi_ip }}:${{ github.event.inputs.project_directory }}/
+          
+          # Deploy index.html
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -P ${{ github.event.inputs.ssh_port }} \
+            raspberry-pi-web-ui/index.html \
+            ${{ github.event.inputs.ssh_username }}@${{ github.event.inputs.raspberry_pi_ip }}:${{ github.event.inputs.project_directory }}/
+          
+          # Deploy beacons_config.json
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -P ${{ github.event.inputs.ssh_port }} \
+            raspberry-pi-web-ui/beacons_config.json \
+            ${{ github.event.inputs.ssh_username }}@${{ github.event.inputs.raspberry_pi_ip }}:${{ github.event.inputs.project_directory }}/
+          
+          # Deploy run_detached.sh
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -P ${{ github.event.inputs.ssh_port }} \
+            raspberry-pi-web-ui/run_detached.sh \
+            ${{ github.event.inputs.ssh_username }}@${{ github.event.inputs.raspberry_pi_ip }}:${{ github.event.inputs.project_directory }}/
+          
+          echo "✅ Files deployed successfully"
+      
+      - name: Install dependencies on Raspberry Pi
+        env:
+          SSH_PASSWORD: ${{ secrets.RASPBERRY_PI_SSH_PASSWORD }}
+        run: |
+          echo "📦 Installing Python dependencies..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${{ github.event.inputs.ssh_port }} \
+            ${{ github.event.inputs.ssh_username }}@${{ github.event.inputs.raspberry_pi_ip }} \
+            "cd ${{ github.event.inputs.project_directory }} && pip3 install flask flask-cors 2>/dev/null || sudo pip3 install flask flask-cors"
+          echo "✅ Dependencies installed"
+      
+      - name: Restart beacon service
+        env:
+          SSH_PASSWORD: ${{ secrets.RASPBERRY_PI_SSH_PASSWORD }}
+        run: |
+          echo "🔄 Restarting beacon service..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${{ github.event.inputs.ssh_port }} \
+            ${{ github.event.inputs.ssh_username }}@${{ github.event.inputs.raspberry_pi_ip }} \
+            "cd ${{ github.event.inputs.project_directory }} && \
+             screen -X -S beacon_simulator quit 2>/dev/null; \
+             chmod +x run_detached.sh && \
+             ./run_detached.sh"
+          echo "✅ Service restarted"
+      
+      - name: Display success message
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo ""
+          echo "📱 Web UI is now accessible at:"
+          echo "   http://${{ github.event.inputs.raspberry_pi_ip }}:5000"
+          echo ""
+          echo "🔍 To check status, SSH into your Raspberry Pi:"
+          echo "   ssh ${{ github.event.inputs.ssh_username }}@${{ github.event.inputs.raspberry_pi_ip }}"
+          echo "   screen -r beacon_simulator"
+          echo ""
+          echo "⚠️  Make sure your Raspberry Pi is accessible and Bluetooth is enabled!"
+      
+      - name: Create deployment summary
+        run: |
+          echo "### 🎉 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Target:** ${{ github.event.inputs.ssh_username }}@${{ github.event.inputs.raspberry_pi_ip }}:${{ github.event.inputs.ssh_port }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Directory:** ${{ github.event.inputs.project_directory }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Web UI:** [http://${{ github.event.inputs.raspberry_pi_ip }}:5000](http://${{ github.event.inputs.raspberry_pi_ip }}:5000)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### 📦 Deployed Files:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ simulate_beacon.py" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ index.html" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ beacons_config.json" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ run_detached.sh" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### 🔐 Security Note:" >> $GITHUB_STEP_SUMMARY
+          echo "SSH password is securely stored in GitHub Secrets and never exposed in logs." >> $GITHUB_STEP_SUMMARY

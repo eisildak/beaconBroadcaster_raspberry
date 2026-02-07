@@ -181,7 +181,7 @@
 
     <script>
         const API_BASE = window.location.origin;
-        let currentBeacon = null;
+        let currentBeacons = [];  // Array of currently active beacons (multi-beacon support)
         let savedBeacons = [];
 
         function showMessage(msg, type = 'info') {
@@ -220,8 +220,7 @@
             try {
                 const response = await fetch(`${API_BASE}/beacon`);
                 if (response.ok) {
-                    const beacons = await response.json();
-                    currentBeacon = beacons && beacons.length > 0 ? beacons[0] : null;
+                    currentBeacons = await response.json();
                     updateCurrentBeaconUI();
                 }
             } catch (e) {
@@ -233,23 +232,54 @@
             const container = document.getElementById('current-beacon-info');
             const indicator = document.getElementById('live-indicator');
             
-            if (currentBeacon) {
+            if (currentBeacons && currentBeacons.length > 0) {
                 indicator.classList.remove('hidden');
-                container.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-4xl font-bold text-white tracking-tighter">${currentBeacon.major}:${currentBeacon.minor}</span>
-                            <span class="text-slate-500 text-xs font-mono">${currentBeacon.rssi} dBm</span>
+                
+                if (currentBeacons.length === 1) {
+                    // Single beacon
+                    const beacon = currentBeacons[0];
+                    container.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-4xl font-bold text-white tracking-tighter">${beacon.major}:${beacon.minor}</span>
+                                <span class="text-slate-500 text-xs font-mono">${beacon.rssi} dBm</span>
+                            </div>
+                            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                                <p class="text-[10px] font-black text-slate-500 uppercase mb-1">Device UUID</p>
+                                <p class="font-mono text-xs text-blue-400 break-all leading-relaxed">${beacon.uuid}</p>
+                            </div>
+                            <button onclick="stopAllBeacons()" class="mt-4 w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                                Stop Broadcasting
+                            </button>
                         </div>
-                        <div class="bg-black/20 p-3 rounded-lg border border-white/5">
-                            <p class="text-[10px] font-black text-slate-500 uppercase mb-1">Device UUID</p>
-                            <p class="font-mono text-xs text-blue-400 break-all leading-relaxed">${currentBeacon.uuid}</p>
+                    `;
+                } else {
+                    // Multiple beacons - show count and list
+                    const beaconsHtml = currentBeacons.map((beacon, idx) => `
+                        <div class="bg-black/20 p-3 rounded-lg border border-emerald-500/20 flex items-center justify-between">
+                            <div>
+                                <span class="text-white font-bold">${beacon.major}:${beacon.minor}</span>
+                                <span class="text-slate-500 text-xs ml-2">${beacon.rssi} dBm</span>
+                            </div>
+                            <span class="text-emerald-400 text-[10px] font-bold">LIVE</span>
                         </div>
-                        <button onclick="stopBeacon()" class="mt-4 w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 py-2.5 rounded-xl font-bold text-sm transition-colors">
-                            Stop Broadcasting
-                        </button>
-                    </div>
-                `;
+                    `).join('');
+                    
+                    container.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex items-baseline gap-2 mb-3">
+                                <span class="text-2xl font-bold text-white">${currentBeacons.length} Beacons</span>
+                                <span class="text-slate-500 text-xs">Multiplexing Active</span>
+                            </div>
+                            <div class="space-y-2 max-h-64 overflow-y-auto">
+                                ${beaconsHtml}
+                            </div>
+                            <button onclick="stopAllBeacons()" class="mt-4 w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                                Stop All Broadcasting
+                            </button>
+                        </div>
+                    `;
+                }
             } else {
                 indicator.classList.add('hidden');
                 container.innerHTML = `
@@ -275,9 +305,9 @@
             }
 
             container.innerHTML = savedBeacons.map((beacon, index) => {
-                const isActive = currentBeacon && currentBeacon.uuid === beacon.uuid && currentBeacon.major === beacon.major && currentBeacon.minor === beacon.minor;
+                const isActive = currentBeacons.some(cb => cb.uuid === beacon.uuid && cb.major === beacon.major && cb.minor === beacon.minor);
                 return `
-                    <div class="bg-white rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between transition-all hover:shadow-xl hover:-translate-y-1 ${isActive ? 'ring-2 ring-blue-500 shadow-blue-500/10' : 'shadow-sm border border-slate-100'}">
+                    <div class="bg-white rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between transition-all hover:shadow-xl hover:-translate-y-1 ${isActive ? 'ring-2 ring-emerald-500 shadow-emerald-500/10' : 'shadow-sm border border-slate-100'}">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-1">
                                 <h3 class="text-slate-900 font-bold text-base">${beacon.name}</h3>
@@ -290,9 +320,15 @@
                             </div>
                         </div>
                         <div class="flex gap-2 mt-4 md:mt-0">
-                            <button onclick="enableBeacon(${index})" class="${isActive ? 'bg-slate-100 text-slate-400 cursor-default' : 'hootsuite-green text-white shadow-md active:scale-95'} px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px]" ${isActive ? 'disabled' : ''}>
-                                ${isActive ? 'Broadcasting' : 'Enable'}
-                            </button>
+                            ${isActive ? `
+                                <button onclick="stopSpecificBeacon(${index})" class="bg-red-50 hover:bg-red-100 text-red-600 px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px] active:scale-95">
+                                    Stop
+                                </button>
+                            ` : `
+                                <button onclick="enableBeacon(${index})" class="hootsuite-green text-white shadow-md active:scale-95 px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px]">
+                                    Enable
+                                </button>
+                            `}
                             <button onclick="deleteBeacon(${index})" class="bg-slate-50 hover:bg-red-50 text-slate-300 hover:text-red-500 p-2 rounded-xl transition-colors border border-slate-100">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
@@ -357,24 +393,46 @@
             }
         }
 
-        async function stopBeacon() {
-            console.log('Stopping beacon...');
+        async function stopAllBeacons() {
+            console.log('Stopping all beacons...');
             try {
                 const res = await fetch(`${API_BASE}/beacon/disable`);
                 console.log('Stop response:', res.status);
                 if (res.ok) {
                     await checkCurrentBeacon();
                     renderBeacons();
-                    showMessage('Broadcast stopped.');
-                    console.log('Beacon stopped successfully');
+                    showMessage('All broadcasts stopped.');
+                    console.log('All beacons stopped successfully');
                 } else {
                     const errorText = await res.text();
                     console.error('Stop failed:', errorText);
                     showMessage('Failed to stop.', 'error');
                 }
             } catch (e) { 
-                console.error('Failed to stop beacon:', e);
+                console.error('Failed to stop beacons:', e);
                 showMessage('Failed to stop.', 'error'); 
+            }
+        }
+
+        async function stopSpecificBeacon(index) {
+            const beacon = savedBeacons[index];
+            console.log('Stopping specific beacon:', beacon);
+            try {
+                const res = await fetch(`${API_BASE}/beacon/disable/${beacon.uuid}/${beacon.major}/${beacon.minor}`);
+                console.log('Stop response:', res.status);
+                if (res.ok) {
+                    await checkCurrentBeacon();
+                    renderBeacons();
+                    showMessage(`${beacon.name} stopped.`);
+                    console.log('Beacon stopped successfully');
+                } else {
+                    const errorText = await res.text();
+                    console.error('Stop failed:', errorText);
+                    showMessage('Failed to stop beacon.', 'error');
+                }
+            } catch (e) { 
+                console.error('Failed to stop beacon:', e);
+                showMessage('Failed to stop beacon.', 'error'); 
             }
         }
 
