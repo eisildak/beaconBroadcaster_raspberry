@@ -1,116 +1,181 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beacon Broadcaster - Raspberry Pi</title>
+    <title>Beacon Broadcaster - Control Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        @keyframes pulse-green {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0f172a; 
+            color: #f1f5f9;
         }
-        .beacon-active {
-            animation: pulse-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .hootsuite-dark { background-color: #1e293b; }
+        .hootsuite-green { background-color: #2fb67e; }
+        .hootsuite-green:hover { background-color: #269a6a; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3); }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.33); opacity: 1; }
+            80%, 100% { opacity: 0; }
         }
+        .status-pulse {
+            position: relative;
+            display: inline-flex;
+            border-radius: 50%;
+            height: 10px;
+            width: 10px;
+            background-color: #2fb67e;
+        }
+        .status-pulse::after {
+            content: '';
+            position: absolute;
+            width: 300%;
+            height: 300%;
+            left: -100%;
+            top: -100%;
+            border-radius: 50%;
+            background-color: #2fb67e;
+            animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .input-field {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #1e293b;
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            ring: 2px;
+            ring-color: #3b82f6;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-4">
-                    <img src="assets/play_store_512.png" alt="Beacon Broadcaster" class="w-16 h-16 rounded-lg shadow-lg">
-                    <div>
-                        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                            Beacon Broadcaster
-                        </h1>
-                        <p class="text-gray-400 mt-2">Raspberry Pi iBeacon Controller</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="text-sm text-gray-500">Status</div>
-                    <div id="connection-status" class="flex items-center gap-2 mt-1">
-                        <div class="w-3 h-3 rounded-full bg-green-500 beacon-active"></div>
-                        <span class="text-green-400 font-medium">Connected</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Current Beacon Status -->
-        <div id="current-beacon-card" class="bg-gray-800 rounded-lg p-6 mb-6 border border-gray-700">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                <span class="text-2xl">📡</span>
-                Current Broadcasting
-            </h2>
-            <div id="current-beacon-info" class="text-gray-400">
-                No beacon broadcasting
-            </div>
-        </div>
-
-        <!-- Add New Beacon Form -->
-        <div class="bg-gray-800 rounded-lg p-6 mb-6 border border-gray-700">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                <span class="text-2xl">➕</span>
-                Add New Beacon
-            </h2>
-            <form id="add-beacon-form" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Beacon Name</label>
-                        <input type="text" id="beacon-name" required
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500"
-                               placeholder="e.g., Office Entrance">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">TX Power (dBm)</label>
-                        <input type="number" id="beacon-rssi" required value="-59" min="-100" max="20"
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                </div>
+<body class="min-h-screen antialiased">
+    <!-- Navigation Bar -->
+    <nav class="border-b border-slate-800 bg-[#0f172a]/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="assets/play_store_512.png" alt="Beacon Broadcaster" class="w-10 h-10 rounded-xl shadow-lg">
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">UUID</label>
-                    <input type="text" id="beacon-uuid" required
-                           class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500 font-mono text-sm"
-                           placeholder="e.g., FDA50693-A4E2-4FB1-AFCF-C6EB07647825"
-                           pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}">
+                    <h1 class="text-xl font-bold tracking-tight text-white leading-none">Beacon</h1>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-blue-500">Broadcaster</span>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Major (0-65535)</label>
-                        <input type="number" id="beacon-major" required min="0" max="65535" value="1"
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Minor (0-65535)</label>
-                        <input type="number" id="beacon-minor" required min="0" max="65535" value="1"
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                </div>
-                <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rou nded-lg transition">
-                    ➕ Add Beacon
-                </button>
-            </form>
-        </div>
-
-        <!-- Saved Beacons List -->
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                <span class="text-2xl">📋</span>
-                Saved Beacons
-            </h2>
-            <div id="beacons-list" class="space-y-3">
-                <!-- Beacons will be dynamically added here -->
+            </div>
+            <div id="connection-status" class="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-full border border-slate-800">
+                <div class="status-pulse"></div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">System Active</span>
             </div>
         </div>
+    </nav>
 
-        <!-- Footer -->
-        <div class="mt-8 text-center text-gray-500 text-sm">
-            <p>Raspberry Pi @ <span id="pi-address">192.168.1.180</span> | Port 8000</p>
-            <p class="mt-1">Made for Appium testing & manual beacon control</p>
+    <main class="container mx-auto px-6 py-8 max-w-6xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Current Status and Form -->
+            <div class="lg:col-span-5 space-y-6">
+                <!-- Live Broadcasting Card -->
+                <div class="hootsuite-dark rounded-2xl p-6 card-shadow border border-slate-700 relative overflow-hidden group">
+                    <div class="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xs font-black text-blue-400 uppercase tracking-[0.2em]">Live Broadcasting Status</h2>
+                        <div id="live-indicator" class="hidden">
+                            <span class="bg-red-500/10 text-red-500 text-[10px] font-black px-2 py-1 rounded border border-red-500/20">LIVE</span>
+                        </div>
+                    </div>
+
+                    <div id="current-beacon-info" class="space-y-4">
+                        <p class="text-slate-500 italic text-sm">Scanning for active signal...</p>
+                    </div>
+                </div>
+
+                <!-- New Beacon Configuration Form -->
+                <div class="bg-white rounded-2xl p-6 card-shadow border border-slate-200">
+                    <h2 class="text-slate-900 text-lg font-bold mb-6 flex items-center gap-2">
+                        Configure New Beacon
+                    </h2>
+                    <form id="add-beacon-form" class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">Name (Friendly Name)</label>
+                            <input type="text" id="beacon-name" required class="w-full input-field" placeholder="e.g., Office Entrance">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">UUID</label>
+                            <input type="text" id="beacon-uuid" required class="w-full input-field font-mono text-sm" placeholder="FDA50693-A4E2-4FB1-AFCF-C6EB07647825">
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">Major</label>
+                                <input type="number" id="beacon-major" value="1" min="0" max="65535" class="w-full input-field">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">Minor</label>
+                                <input type="number" id="beacon-minor" value="1" min="0" max="65535" class="w-full input-field">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">Power</label>
+                                <input type="number" id="beacon-rssi" value="-59" min="-100" max="20" class="w-full input-field">
+                            </div>
+                        </div>
+                        <button type="submit" class="hootsuite-green w-full text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/20 transform active:scale-[0.98] transition-all mt-2">
+                            Start Broadcasting / Save
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Saved Configurations -->
+            <div class="lg:col-span-7">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-baseline gap-2">
+                        <h2 class="text-2xl font-bold text-white">Registry</h2>
+                        <span class="text-slate-500 text-xs font-medium">| <span id="beacon-count">0</span> configurations</span>
+                    </div>
+                    <button onclick="loadBeacons()" class="p-2 text-slate-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+
+                <div id="beacons-list" class="space-y-4">
+                    <!-- Dynamic Content -->
+                    <div class="animate-pulse space-y-4">
+                        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
+                        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="container mx-auto px-6 py-12 border-t border-slate-800 mt-12 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="text-slate-500 text-xs">
+            RPi Station: <span id="pi-address" class="text-slate-300 font-mono bg-slate-800 px-2 py-1 rounded">192.168.1.180</span>
+        </div>
+        <div class="text-slate-600 text-[10px] font-bold uppercase tracking-widest">
+            Manual Control Center &bull; v2.0
+        </div>
+    </footer>
+
+    <!-- Custom Notification System -->
+    <div id="notification" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-[100]">
+        <div class="bg-slate-900 border border-slate-700 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+            <div id="notif-icon" class="w-2 h-2 rounded-full bg-blue-500"></div>
+            <p id="notif-message" class="text-sm font-medium"></p>
         </div>
     </div>
 
@@ -119,28 +184,38 @@
         let currentBeacon = null;
         let savedBeacons = [];
 
-        // Load initial data
+        function showMessage(msg, type = 'info') {
+            const notif = document.getElementById('notification');
+            const icon = document.getElementById('notif-icon');
+            document.getElementById('notif-message').innerText = msg;
+            
+            icon.className = `w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-emerald-500'}`;
+            
+            notif.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                notif.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
         async function init() {
             await loadBeacons();
             await checkCurrentBeacon();
-            // Refresh current beacon status every 3 seconds
             setInterval(checkCurrentBeacon, 3000);
         }
 
-        // Load saved beacons from server
         async function loadBeacons() {
             try {
                 const response = await fetch(`${API_BASE}/beacon/list`);
                 if (response.ok) {
                     savedBeacons = await response.json();
+                    document.getElementById('beacon-count').innerText = savedBeacons.length;
                     renderBeacons();
                 }
-            } catch (error) {
-                console.error('Failed to load beacons:', error);
+            } catch (e) { 
+                console.error('Failed to load list:', e); 
             }
         }
 
-        // Check current broadcasting beacon
         async function checkCurrentBeacon() {
             try {
                 const response = await fetch(`${API_BASE}/beacon`);
@@ -149,207 +224,177 @@
                     currentBeacon = beacons && beacons.length > 0 ? beacons[0] : null;
                     updateCurrentBeaconUI();
                 }
-            } catch (error) {
-                console.error('Failed to check current beacon:', error);
-                document.getElementById('connection-status').innerHTML = `
-                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span class="text-red-400 font-medium">Disconnected</span>
-                `;
+            } catch (e) {
+                document.getElementById('connection-status').innerHTML = '<span class="text-red-500 text-[10px] font-black italic uppercase">NO CONNECTION</span>';
             }
         }
 
-        // Update current beacon UI
         function updateCurrentBeaconUI() {
             const container = document.getElementById('current-beacon-info');
+            const indicator = document.getElementById('live-indicator');
+            
             if (currentBeacon) {
+                indicator.classList.remove('hidden');
                 container.innerHTML = `
-                    <div class="flex items-start justify-between">
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-3">
-                                <div class="w-4 h-4 rounded-full bg-green-500 beacon-active"></div>
-                                <span class="text-green-400 font-semibold text-lg">Broadcasting Active</span>
-                            </div>
-                            <div class="ml-7 space-y-1 text-sm">
-                                <div><span class="text-gray-500">UUID:</span> <span class="font-mono text-blue-400">${currentBeacon.uuid}</span></div>
-                                <div><span class="text-gray-500">Major:</span> <span class="text-white">${currentBeacon.major}</span> 
-                                     <span class="text-gray-500 ml-4">Minor:</span> <span class="text-white">${currentBeacon.minor}</span></div>
-                                <div><span class="text-gray-500">TX Power:</span> <span class="text-white">${currentBeacon.rssi} dBm</span></div>
-                            </div>
+                    <div class="space-y-4">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-4xl font-bold text-white tracking-tighter">${currentBeacon.major}:${currentBeacon.minor}</span>
+                            <span class="text-slate-500 text-xs font-mono">${currentBeacon.rssi} dBm</span>
                         </div>
-                        <button onclick="stopBeacon()" 
-                                class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition">
-                            🛑 Stop
+                        <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                            <p class="text-[10px] font-black text-slate-500 uppercase mb-1">Device UUID</p>
+                            <p class="font-mono text-xs text-blue-400 break-all leading-relaxed">${currentBeacon.uuid}</p>
+                        </div>
+                        <button onclick="stopBeacon()" class="mt-4 w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                            Stop Broadcasting
                         </button>
                     </div>
                 `;
             } else {
+                indicator.classList.add('hidden');
                 container.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-4 h-4 rounded-full bg-gray-600"></div>
-                        <span class="text-gray-400">No beacon broadcasting</span>
+                    <div class="py-6 text-center">
+                        <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        </div>
+                        <p class="text-slate-500 text-sm font-medium">No active broadcast at the moment.</p>
                     </div>
                 `;
             }
         }
 
-        // Render saved beacons
         function renderBeacons() {
             const container = document.getElementById('beacons-list');
             if (savedBeacons.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <div class="text-4xl mb-2">📭</div>
-                        <p>No saved beacons yet. Add one above!</p>
+                    <div class="text-center py-16 border-2 border-dashed border-slate-800 rounded-3xl">
+                        <p class="text-slate-600 font-medium">No saved configurations yet.</p>
                     </div>
                 `;
                 return;
             }
 
             container.innerHTML = savedBeacons.map((beacon, index) => {
-                const isActive = currentBeacon && 
-                                currentBeacon.uuid === beacon.uuid &&
-                                currentBeacon.major === beacon.major &&
-                                currentBeacon.minor === beacon.minor;
-                
+                const isActive = currentBeacon && currentBeacon.uuid === beacon.uuid && currentBeacon.major === beacon.major && currentBeacon.minor === beacon.minor;
                 return `
-                    <div class="bg-gray-700 rounded-lg p-4 ${isActive ? 'border-2 border-green-500' : 'border border-gray-600'}">
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-2">
-                                    ${isActive ? '<div class="w-3 h-3 rounded-full bg-green-500 beacon-active"></div>' : ''}
-                                    <h3 class="font-semibold text-lg ${isActive ? 'text-green-400' : 'text-white'}">${beacon.name}</h3>
-                                </div>
-                                <div class="space-y-1 text-sm ml-${isActive ? '5' : '0'}">
-                                    <div><span class="text-gray-400">UUID:</span> <span class="font-mono text-blue-400">${beacon.uuid}</span></div>
-                                    <div><span class="text-gray-400">Major:</span> ${beacon.major} <span class="text-gray-400 ml-4">Minor:</span> ${beacon.minor}</div>
-                                    <div><span class="text-gray-400">TX Power:</span> ${beacon.rssi} dBm</div>
-                                </div>
+                    <div class="bg-white rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between transition-all hover:shadow-xl hover:-translate-y-1 ${isActive ? 'ring-2 ring-blue-500 shadow-blue-500/10' : 'shadow-sm border border-slate-100'}">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="text-slate-900 font-bold text-base">${beacon.name}</h3>
+                                ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>' : ''}
                             </div>
-                            <div class="flex flex-col gap-2 ml-4">
-                                ${!isActive ? `
-                                    <button onclick="enableBeacon(${index})" 
-                                            class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded whitespace-nowrap transition">
-                                        ▶️ Enable
-                                    </button>
-                                ` : `
-                                    <button onclick="stopBeacon()" 
-                                            class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded whitespace-nowrap transition">
-                                        🛑 Stop
-                                    </button>
-                                `}
-                                <button onclick="deleteBeacon(${index})" 
-                                        class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded whitespace-nowrap transition">
-                                    🗑️ Delete
-                                </button>
+                            <div class="flex flex-wrap gap-x-4 gap-y-1">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">ID: <span class="text-slate-900 font-mono">${beacon.major} / ${beacon.minor}</span></span>
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Power: <span class="text-slate-900">${beacon.rssi}dBm</span></span>
+                                <span class="text-[10px] font-black text-blue-500/70 uppercase tracking-tighter font-mono truncate max-w-[150px]">${beacon.uuid}</span>
                             </div>
+                        </div>
+                        <div class="flex gap-2 mt-4 md:mt-0">
+                            <button onclick="enableBeacon(${index})" class="${isActive ? 'bg-slate-100 text-slate-400 cursor-default' : 'hootsuite-green text-white shadow-md active:scale-95'} px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px]" ${isActive ? 'disabled' : ''}>
+                                ${isActive ? 'Broadcasting' : 'Enable'}
+                            </button>
+                            <button onclick="deleteBeacon(${index})" class="bg-slate-50 hover:bg-red-50 text-slate-300 hover:text-red-500 p-2 rounded-xl transition-colors border border-slate-100">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // Add new beacon
         document.getElementById('add-beacon-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const beacon = {
                 name: document.getElementById('beacon-name').value,
-                uuid: document.getElementById('beacon-uuid').value.toUpperCase(),
+                uuid: document.getElementById('beacon-uuid').value.trim().toUpperCase(),
                 major: parseInt(document.getElementById('beacon-major').value),
                 minor: parseInt(document.getElementById('beacon-minor').value),
                 rssi: parseInt(document.getElementById('beacon-rssi').value)
             };
-
+            
             try {
                 const response = await fetch(`${API_BASE}/beacon/add`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(beacon)
                 });
-
                 if (response.ok) {
                     savedBeacons = await response.json();
+                    document.getElementById('beacon-count').innerText = savedBeacons.length;
                     renderBeacons();
                     e.target.reset();
-                    // Set default values
                     document.getElementById('beacon-major').value = '1';
                     document.getElementById('beacon-minor').value = '1';
                     document.getElementById('beacon-rssi').value = '-59';
+                    showMessage('Beacon saved successfully.');
                 } else {
-                    alert('Failed to add beacon');
+                    showMessage('Error occurred during save.', 'error');
                 }
-            } catch (error) {
-                console.error('Failed to add beacon:', error);
-                alert('Failed to add beacon');
+            } catch (e) { 
+                showMessage('Error occurred during save.', 'error'); 
             }
         });
 
-        // Enable beacon
         async function enableBeacon(index) {
             const beacon = savedBeacons[index];
             console.log('Enabling beacon:', beacon);
             try {
-                const response = await fetch(
-                    `${API_BASE}/beacon/enable/${beacon.uuid}/${beacon.major}/${beacon.minor}?rssi=${beacon.rssi}`
-                );
-                console.log('Enable response:', response.status);
-                if (response.ok) {
+                const res = await fetch(`${API_BASE}/beacon/enable/${beacon.uuid}/${beacon.major}/${beacon.minor}?rssi=${beacon.rssi}`);
+                console.log('Enable response:', res.status);
+                if (res.ok) {
                     await checkCurrentBeacon();
-                    renderBeacons(); // Update beacons list UI
+                    renderBeacons();
+                    showMessage(`${beacon.name} broadcast started.`);
                     console.log('Beacon enabled successfully');
                 } else {
-                    const errorText = await response.text();
+                    const errorText = await res.text();
                     console.error('Enable failed:', errorText);
-                    alert('Failed to enable beacon: ' + response.status);
+                    showMessage('Failed to start broadcast.', 'error');
                 }
-            } catch (error) {
-                console.error('Failed to enable beacon:', error);
-                alert('Failed to enable beacon: ' + error.message);
+            } catch (e) { 
+                console.error('Failed to enable beacon:', e);
+                showMessage('Failed to start broadcast.', 'error'); 
             }
         }
 
-        // Stop beacon
         async function stopBeacon() {
             console.log('Stopping beacon...');
             try {
-                const response = await fetch(`${API_BASE}/beacon/disable`);
-                console.log('Stop response:', response.status);
-                if (response.ok) {
-                    await checkCurrentBeacon(); // Refresh from server
-                    renderBeacons(); // Update beacons list UI
+                const res = await fetch(`${API_BASE}/beacon/disable`);
+                console.log('Stop response:', res.status);
+                if (res.ok) {
+                    await checkCurrentBeacon();
+                    renderBeacons();
+                    showMessage('Broadcast stopped.');
                     console.log('Beacon stopped successfully');
                 } else {
-                    const errorText = await response.text();
+                    const errorText = await res.text();
                     console.error('Stop failed:', errorText);
-                    alert('Failed to stop beacon: ' + response.status);
+                    showMessage('Failed to stop.', 'error');
                 }
-            } catch (error) {
-                console.error('Failed to stop beacon:', error);
-                alert('Failed to stop beacon: ' + error.message);
+            } catch (e) { 
+                console.error('Failed to stop beacon:', e);
+                showMessage('Failed to stop.', 'error'); 
             }
         }
 
-        // Delete beacon
         async function deleteBeacon(index) {
-            if (!confirm('Are you sure you want to delete this beacon?')) return;
-
             try {
-                const response = await fetch(`${API_BASE}/beacon/delete/${index}`, {
-                    method: 'DELETE'
-                });
-
+                const response = await fetch(`${API_BASE}/beacon/delete/${index}`, { method: 'DELETE' });
                 if (response.ok) {
                     savedBeacons = await response.json();
+                    document.getElementById('beacon-count').innerText = savedBeacons.length;
                     renderBeacons();
+                    showMessage('Configuration deleted.');
                 } else {
-                    alert('Failed to delete beacon');
+                    showMessage('Failed to delete.', 'error');
                 }
-            } catch (error) {
-                console.error('Failed to delete beacon:', error);
-                alert('Failed to delete beacon');
+            } catch (e) { 
+                console.error('Failed to delete beacon:', e);
+                showMessage('Failed to delete.', 'error'); 
             }
         }
 
-        // Initialize on page load
         init();
     </script>
 </body>

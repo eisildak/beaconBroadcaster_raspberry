@@ -112,18 +112,39 @@
                     <div class="flex items-start gap-3">
                         <div class="text-2xl">⚠️</div>
                         <div>
-                            <p class="font-semibold text-yellow-800 mb-1">Next Step Required</p>
+                            <p class="font-semibold text-yellow-800 mb-1">Quick Deploy Options</p>
                             <p class="text-sm text-yellow-700">
-                                Web UI will open automatically <strong>AFTER you run the deploy script</strong> (deploy.sh) in Terminal.
-                                Download the files below and follow the installation steps.
+                                Choose your preferred method below. <strong>One-liner command</strong> is the fastest!
                             </p>
                         </div>
                     </div>
                 </div>
 
+                <!-- One-Liner Command (Primary Method) -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-5 mb-6">
+                    <h3 class="font-bold text-lg mb-3 text-blue-900 flex items-center gap-2">
+                        <span class="text-2xl">⚡</span>
+                        Fastest: One-Line Deploy Command
+                    </h3>
+                    <p class="text-sm text-blue-800 mb-3">Copy and paste this command in your terminal:</p>
+                    <div class="bg-gray-900 rounded-lg p-4 mb-3 relative">
+                        <code id="one-liner-command" class="text-green-400 text-xs font-mono break-all">
+                            # Command will be generated here
+                        </code>
+                        <button onclick="copyOneLiner()" class="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition">
+                            Copy
+                        </button>
+                    </div>
+                    <div class="flex items-start gap-2 text-xs text-blue-700">
+                        <span>💡</span>
+                        <p>Just open Terminal and paste! No downloads needed. Web UI opens automatically when done.</p>
+                    </div>
+                </div>
+
                 <!-- Instructions -->
                 <div class="bg-white rounded-lg p-6 mb-6 border border-gray-200">
-                    <h3 class="font-bold text-lg mb-3 text-gray-800">📋 Installation Steps</h3>
+                    <h3 class="font-bold text-lg mb-3 text-gray-800">📋 Alternative: Download & Run Script</h3>
+                    <p class="text-sm text-gray-600 mb-3">If you prefer downloading files:</p>
                     <ol class="space-y-3 text-sm text-gray-700">
                         <li class="flex items-start gap-2">
                             <span class="font-bold text-blue-600 min-w-6">1.</span>
@@ -142,17 +163,6 @@
                             <span><strong>Web UI will open automatically</strong> after deployment completes at: <code id="web-url" class="bg-gray-100 px-2 py-1 rounded"></code></span>
                         </li>
                     </ol>
-                </div>
-
-                <!-- Quick Access -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <p class="text-sm text-blue-800 mb-3">
-                        <strong>🌐 Web UI Address:</strong> <code id="web-url-display" class="bg-blue-100 px-2 py-1 rounded"></code>
-                    </p>
-                    <a id="open-webui-btn" href="#" target="_blank" 
-                       class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition text-sm">
-                        🚀 Open Web UI Now (after deployment)
-                    </a>
                 </div>
 
                 <!-- Download Buttons -->
@@ -199,12 +209,36 @@
             // Show result section
             document.getElementById('result-section').classList.remove('hidden');
             document.getElementById('web-url').textContent = webUiUrl;
-            document.getElementById('web-url-display').textContent = webUiUrl;
-            document.getElementById('open-webui-btn').href = webUiUrl;
+            
+            // Generate one-liner command
+            generateOneLinerCommand(config, webUiUrl);
 
             // Scroll to result
             document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
         });
+
+        function generateOneLinerCommand(config, webUiUrl) {
+            // Create one-line deployment command
+            const oneLiner = `curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/simulate_beacon.py | ssh ${config.user}@${config.ip} "cat > ~/${config.dir}/simulate_beacon.py" && curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/index.html | ssh ${config.user}@${config.ip} "cat > ~/${config.dir}/index.html" && ssh ${config.user}@${config.ip} "cd ${config.dir} && screen -X -S beacon_simulator quit 2>/dev/null; chmod +x run_detached.sh && ./run_detached.sh && sleep 2" && echo "✅ Deployment complete! Opening Web UI..." && (open ${webUiUrl} 2>/dev/null || xdg-open ${webUiUrl} 2>/dev/null || start ${webUiUrl} 2>/dev/null)`;
+            
+            document.getElementById('one-liner-command').textContent = oneLiner;
+        }
+
+        function copyOneLiner() {
+            const command = document.getElementById('one-liner-command').textContent;
+            navigator.clipboard.writeText(command).then(() => {
+                alert('✅ Command copied! Paste in terminal to deploy.');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = command;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ Command copied! Paste in terminal to deploy.');
+            });
+        }
 
         function downloadDeployScript() {
             const script = `#!/bin/bash
