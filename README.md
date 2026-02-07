@@ -24,44 +24,48 @@ Real iBeacon broadcasting solution that actually works! Control multiple beacons
 
 ---
 
-## 🚀 Quick Start (3 Steps!)
+## 🚀 Quick Start (Zero Install!)
 
-### Step 1: Clone Repository
+### ✨ Recommended: Setup Wizard (No Installation Required)
 
+🔗 **[Open Setup Wizard on GitHub Pages](https://eisildak.github.io/beaconBroadcaster_raspberry/setup-wizard.html)**
+
+**3 Simple Steps:**
+1. Enter your Raspberry Pi IP, username, password
+2. Click "Generate Deployment Package"
+3. Download and run the deployment script
+
+**That's it!** ☕ Grab a coffee while it deploys automatically.  
+🌐 **Web UI opens automatically** in your browser when deployment completes!
+
+✅ Works entirely in your browser  
+✅ No Python, Flask, or repo cloning needed  
+✅ Anyone can use without any setup
+
+---
+
+### 🔧 Alternative: Auto Deployer (Advanced Users)
+
+For developers who prefer running deployment tools locally:
+
+**Step 1:** Clone repository
 ```bash
 git clone https://github.com/eisildak/beaconBroadcaster_raspberry.git
 cd beaconBroadcaster_raspberry
 ```
 
-### Step 2: Install Flask
-
+**Step 2:** Install Flask
 ```bash
 pip3 install flask
 ```
 
-### Step 3: Launch Auto Deployer
-
+**Step 3:** Launch Auto Deployer
 ```bash
 cd raspberry-pi-web-ui
 python3 auto-deployer.py
 ```
 
 Then open `http://localhost:5000` in your browser and click deploy!
-
-**That's it!** ☕ Grab a coffee while it deploys automatically.
-
-### Alternative: Setup Wizard (No Python Required)
-
-🔗 **Try it online:** [Setup Wizard on GitHub Pages](https://eisildak.github.io/beaconBroadcaster_raspberry/setup-wizard.html)
-
-Or use locally:
-```bash
-open raspberry-pi-web-ui/setup-wizard.html
-```
-
-1. Enter your Raspberry Pi credentials
-2. Click "Generate Deployment Package"
-3. Download files and run deploy script
 
 ---
 

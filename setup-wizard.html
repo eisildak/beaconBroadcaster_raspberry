@@ -11,7 +11,10 @@
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
             <!-- Header -->
             <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
-                <h1 class="text-4xl font-bold mb-2">🎯 Beacon Broadcaster</h1>
+                <div class="flex items-center gap-4 mb-2">
+                    <img src="raspberry-pi-web-ui/assets/play_store_512.png" alt="Beacon Broadcaster" class="w-16 h-16 rounded-lg shadow-lg">
+                    <h1 class="text-4xl font-bold">Beacon Broadcaster</h1>
+                </div>
                 <p class="text-blue-100">Setup Wizard - Configure Your Raspberry Pi</p>
             </div>
 
@@ -122,7 +125,7 @@
                         </li>
                         <li class="flex items-start gap-2">
                             <span class="font-bold text-blue-600 min-w-6">4.</span>
-                            <span>Open Web UI: <code id="web-url" class="bg-gray-100 px-2 py-1 rounded"></code></span>
+                            <span>Web UI will open automatically at: <code id="web-url" class="bg-gray-100 px-2 py-1 rounded"></code></span>
                         </li>
                     </ol>
                 </div>
@@ -146,7 +149,7 @@
 
         <!-- Footer -->
         <div class="text-center mt-8 text-white text-sm">
-            <p>🎯 Beacon Broadcaster - Universal Setup Wizard</p>
+            <p>Beacon Broadcaster - Universal Setup Wizard</p>
             <p class="mt-1 text-blue-200">Anyone can use with their own Raspberry Pi</p>
         </div>
     </div>
@@ -251,6 +254,24 @@ echo -e "\${BLUE}🌐 Web UI:\${NC} http://\${RPI_IP}:\${RPI_PORT}"
 echo -e "\${BLUE}📡 API:\${NC}    http://\${RPI_IP}:\${RPI_PORT}/beacon"
 echo ""
 echo -e "\${GREEN}✅ Ready to use!\${NC}"
+echo ""
+
+# Open Web UI automatically in default browser
+WEB_URL="http://\${RPI_IP}:\${RPI_PORT}"
+echo -e "\${BLUE}🚀 Opening Web UI in browser...\${NC}"
+
+if command -v open &> /dev/null; then
+    # macOS
+    open "\${WEB_URL}"
+elif command -v xdg-open &> /dev/null; then
+    # Linux
+    xdg-open "\${WEB_URL}"
+elif command -v start &> /dev/null; then
+    # Windows Git Bash
+    start "\${WEB_URL}"
+else
+    echo -e "\${YELLOW}⚠️  Please manually open: \${WEB_URL}\${NC}"
+fi
 `;
 
             downloadFile('deploy.sh', script);
