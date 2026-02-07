@@ -31,12 +31,29 @@
             width: 320px;
             z-index: 1000;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        .info-tooltip.tooltip-top {
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+        }
+        .info-tooltip.tooltip-top::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1e293b;
+        }
+        .info-tooltip.tooltip-bottom {
             top: 100%;
             left: 50%;
             transform: translateX(-50%);
             margin-top: 8px;
         }
-        .info-tooltip::before {
+        .info-tooltip.tooltip-bottom::before {
             content: '';
             position: absolute;
             bottom: 100%;
@@ -54,7 +71,7 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 min-h-screen">
-    <div class="container mx-auto px-4 py-12 max-w-2xl">
+    <div class="container mx-auto px-4 py-12 max-w-4xl">
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
             <!-- Header -->
             <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
@@ -82,7 +99,7 @@
                             Raspberry Pi IP Adresi *
                             <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
                                 ?
-                                <div class="info-tooltip">
+                                <div class="info-tooltip tooltip-bottom">
                                     <strong class="block mb-1">📍 Finding Your Raspberry Pi IP Address:</strong>
                                     Open terminal on your Raspberry Pi and run:
                                     <code class="block bg-black/30 px-2 py-1 rounded mt-2 mb-2 font-mono text-xs">hostname -I</code>
@@ -102,7 +119,7 @@
                             SSH Username *
                             <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
                                 ?
-                                <div class="info-tooltip">
+                                <div class="info-tooltip tooltip-bottom">
                                     <strong class="block mb-1">👤 SSH Username:</strong>
                                     The username you set when you first installed your Raspberry Pi. 
                                     <br><br>
@@ -124,7 +141,7 @@
                             SSH Password *
                             <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
                                 ?
-                                <div class="info-tooltip">
+                                <div class="info-tooltip tooltip-bottom">
                                     <strong class="block mb-1">🔒 SSH Password:</strong>
                                     The password you set when you first installed your Raspberry Pi.
                                     <br><br>
@@ -146,7 +163,7 @@
                             Project Directory *
                             <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
                                 ?
-                                <div class="info-tooltip">
+                                <div class="info-tooltip tooltip-top">
                                     <strong class="block mb-1">📁 Project Directory Name:</strong>
                                     The folder name where beacon simulator files will be stored on your Raspberry Pi.
                                     <br><br>
@@ -168,7 +185,7 @@
                             API Port
                             <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
                                 ?
-                                <div class="info-tooltip">
+                                <div class="info-tooltip tooltip-top">
                                     <strong class="block mb-1">🔌 API Port Number:</strong>
                                     The port number where the web interface will run.
                                     <br><br>
@@ -230,9 +247,13 @@
                             Copy
                         </button>
                     </div>
-                    <div class="flex items-start gap-2 text-xs text-blue-700">
+                    <div class="flex items-start gap-2 text-xs text-blue-700 mb-2">
                         <span>💡</span>
                         <p>Just open Terminal and paste! No downloads needed. Web UI opens automatically when done.</p>
+                    </div>
+                    <div class="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 rounded p-2">
+                        <span>⏱️</span>
+                        <p><strong>Note:</strong> After running the command in the terminal, wait a few seconds to enter the password when prompted.</p>
                     </div>
                 </div>
 

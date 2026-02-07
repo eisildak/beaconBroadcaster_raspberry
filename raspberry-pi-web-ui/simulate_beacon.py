@@ -177,11 +177,19 @@ def start_api(args):
 	@app.route('/beacon/disable', methods=['GET'])
 	def disable_beacon():
 		"""EXISTING: Disable ALL beacons (Appium-compatible)"""
-		global active_beacons
+		global active_beacons, multiplex_running
 		print("🛑 Stopping all beacons...")
+		
+		# Stop multiplex immediately
+		multiplex_running = False
+		time.sleep(0.6)  # Wait for thread to finish current cycle
+		
+		# Clear active beacons and stop advertisement
+		active_beacons = []
 		stop_advertisement(args.bluetooth_interface)
+		
 		print("✅ All beacons stopped")
-		return jsonify({'status': 'disabled', 'beacons': []}), 200
+		return jsonify({'status': 'disabled', 'beacons': active_beacons}), 200
 	
 	@app.route('/beacon/disable/<uuid>/<int:major>/<int:minor>', methods=['GET'])
 	def disable_specific_beacon(uuid, major, minor):
