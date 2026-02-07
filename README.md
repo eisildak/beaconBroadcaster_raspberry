@@ -1,4 +1,4 @@
-# 🎯 Beacon Broadcaster with Raspberry Pi
+# 🎯 Beacon Broadcaster Raspberry
 
 ![Platform](https://img.shields.io/badge/platform-Raspberry_Pi-red)
 ![Python](https://img.shields.io/badge/Python-3.x-blue)
