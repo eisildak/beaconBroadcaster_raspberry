@@ -67,9 +67,17 @@ def start_multiplex_ibeacons(beacons, interface='hci0'):
 	multiplex_running = True
 	multiplex_beacons = beacons
 	i = 0
+	
+	print(f"🔄 Multiplex thread started with {len(active_beacons)} beacons")
+	
 	while multiplex_running and len(active_beacons) > 0:
-		# Double-check before each iteration
-		if not multiplex_running or len(active_beacons) == 0:
+		# Critical: Double-check both conditions before each iteration
+		if not multiplex_running:
+			print("⏸️  Multiplex stopped by flag")
+			break
+			
+		if len(active_beacons) == 0:
+			print("⏸️  Multiplex stopped - no active beacons")
 			break
 			
 		j = i % len(active_beacons)
@@ -78,16 +86,45 @@ def start_multiplex_ibeacons(beacons, interface='hci0'):
 		time.sleep(4*100/1000)
 		i += 1
 	
-	print("⛔ Multiplex thread stopped")
+	print("⛔ Multiplex thread exiting cleanly")
 
 def stop_advertisement(interface='hci0'):
 	global multiplex_running, current_beacon, multiplex_beacons, active_beacons
+	
+	print("🛑 STOPPING ALL ADVERTISING - Aggressive cleanup starting...")
+	
+	# Stop multiplex immediately
 	multiplex_running = False
 	current_beacon = None
 	multiplex_beacons = None
 	active_beacons = []
-	time.sleep(1)
-	subprocess.run(['sudo', 'hciconfig', interface, 'down'], check=False)
+	
+	# Wait for multiplex thread to complete current cycle
+	time.sleep(1.0)
+	
+	# CRITICAL FIX: Aggressively disable advertising - repeat 3 times
+	# Just doing "hciconfig down" is not enough - advertising can survive!
+	for attempt in range(3):
+		try:
+			print(f"  🔄 Disable attempt {attempt + 1}/3...")
+			# HCI command to disable advertising (0x08 0x000a 00)
+			subprocess.run(f'sudo hcitool -i {interface} cmd 0x08 0x000a 00'.split(), 
+						   check=False, capture_output=True)
+			time.sleep(0.15)
+		except Exception as e:
+			print(f"  ⚠️ Disable attempt {attempt + 1} error (continuing): {e}")
+	
+	# Reset BLE interface completely
+	print("  🔄 Resetting BLE interface...")
+	try:
+		subprocess.run(['sudo', 'hciconfig', interface, 'down'], check=False, capture_output=True)
+		time.sleep(0.4)
+		subprocess.run(['sudo', 'hciconfig', interface, 'up'], check=False, capture_output=True)
+		time.sleep(0.4)
+	except Exception as e:
+		print(f"  ⚠️ Interface reset error: {e}")
+	
+	print("✅ ALL ADVERTISING STOPPED - Interface reset complete")
 
 def set_advertisment_interval(min_interval, max_interval, interface='hci0'):
 	min_interval_le = int(min_interval * 1.6).to_bytes(2, byteorder='little').hex()
@@ -184,13 +221,14 @@ def start_api(args):
 	def disable_beacon():
 		"""EXISTING: Disable ALL beacons (Appium-compatible)"""
 		global active_beacons, multiplex_running
-		print("🛑 Stopping all beacons...")
+		
+		print(f"🛑 Request to stop ALL beacons (currently {len(active_beacons)} active)...")
 		
 		# Stop multiplex immediately
 		multiplex_running = False
-		time.sleep(0.6)  # Wait for thread to finish current cycle
+		time.sleep(0.8)  # Wait for thread to finish current cycle
 		
-		# Clear active beacons and stop advertisement
+		# Clear active beacons and perform aggressive stop
 		active_beacons = []
 		stop_advertisement(args.bluetooth_interface)
 		
@@ -202,33 +240,42 @@ def start_api(args):
 		"""NEW: Disable specific beacon (for multi-beacon support)"""
 		global active_beacons, multiplex_running, multiplex_thread
 		
+		print(f"🛑 Request to disable beacon: {uuid} (Major: {major}, Minor: {minor})")
+		print(f"📊 Current active beacons before disable: {len(active_beacons)}")
+		
 		# Find and remove beacon
 		beacon_found = False
 		for i, beacon in enumerate(active_beacons):
 			if beacon['uuid'] == uuid and beacon['major'] == major and beacon['minor'] == minor:
 				active_beacons.pop(i)
 				beacon_found = True
-				print(f"🛑 Beacon removed: {uuid} (Major: {major}, Minor: {minor})")
+				print(f"✅ Beacon removed from active list: {uuid} (Major: {major}, Minor: {minor})")
 				break
 		
 		if not beacon_found:
 			print(f"⚠️  Beacon not found in active list: {uuid} (Major: {major}, Minor: {minor})")
 			return jsonify({'status': 'not_found', 'beacons': active_beacons}), 404
 		
-		# Stop current broadcasting
-		multiplex_running = False
-		time.sleep(0.6)  # Wait for multiplex thread to finish
+		print(f"📊 Active beacons after removal: {len(active_beacons)}")
 		
-		# Restart with remaining beacons
+		# CRITICAL: Stop multiplex IMMEDIATELY
+		multiplex_running = False
+		print("⏸️  Multiplex stopped, waiting for thread to finish...")
+		time.sleep(0.8)  # Wait for multiplex thread to finish current cycle
+		
+		# Handle remaining beacons
 		if len(active_beacons) == 0:
-			print("✅ No more active beacons - stopping all broadcasts")
+			print("🚨 LAST BEACON DISABLED - Performing aggressive cleanup...")
+			# CRITICAL FIX: When last beacon is disabled, aggressively stop everything
 			stop_advertisement(args.bluetooth_interface)
-			time.sleep(0.2)  # Ensure advertisement stops completely
+			print("✅ All broadcasts stopped - no active beacons remaining")
+			
 		elif len(active_beacons) == 1:
-			# Single beacon remaining
+			# Single beacon remaining - direct broadcast
 			beacon = active_beacons[0]
-			print(f"📡 Restarting with single beacon: {beacon['uuid']}")
+			print(f"📡 Restarting with single beacon: {beacon['uuid']} (Major: {beacon['major']}, Minor: {beacon['minor']})")
 			start_ibeacon(beacon['uuid'], beacon['major'], beacon['minor'], beacon['rssi'], args.interval, args.interval, args.bluetooth_interface)
+			
 		else:
 			# Multiple beacons remaining - restart multiplex
 			print(f"📡 Restarting multiplex with {len(active_beacons)} beacons...")
