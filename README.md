@@ -28,7 +28,8 @@ Real iBeacon broadcasting solution that actually works! Control multiple beacons
 
 ### ✨ Recommended: Setup Wizard (No Installation Required)
 
-🔗 **[Open Setup Wizard on GitHub Pages](https://eisildak.github.io/beaconBroadcaster_raspberry/setup-wizard.html)**
+🔗 **[Open Setup Wizard](https://eisildak.github.io/beaconBroadcaster_raspberry/)** - Main page  
+📱 **[Beacon Control Panel](https://eisildak.github.io/beaconBroadcaster_raspberry/control-panel.html)** - Direct access to control interface
 
 **3 Simple Steps:**
 1. Enter your Raspberry Pi IP, username, password
