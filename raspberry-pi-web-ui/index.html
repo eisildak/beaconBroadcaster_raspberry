@@ -61,6 +61,21 @@
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="min-h-screen antialiased">
@@ -321,8 +336,9 @@
                                     Stop
                                 </button>
                             ` : `
-                                <button onclick="enableBeacon(${index})" class="hootsuite-green text-white shadow-md active:scale-95 px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px]">
-                                    Enable
+                                <button onclick="enableBeacon(${index})" id="enable-btn-${index}" class="hootsuite-green text-white shadow-md active:scale-95 px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px] flex items-center justify-center gap-2">
+                                    <span class="enable-text">Enable</span>
+                                    <div class="spinner hidden"></div>
                                 </button>
                             `}
                             <button onclick="deleteBeacon(${index})" class="bg-slate-50 hover:bg-red-50 text-slate-300 hover:text-red-500 p-2 rounded-xl transition-colors border border-slate-100">
@@ -369,6 +385,18 @@
 
         async function enableBeacon(index) {
             const beacon = savedBeacons[index];
+            const button = document.getElementById(`enable-btn-${index}`);
+            const spinner = button?.querySelector('.spinner');
+            const text = button?.querySelector('.enable-text');
+            
+            // Show spinner, hide text
+            if (spinner && text) {
+                spinner.classList.remove('hidden');
+                text.classList.add('hidden');
+                button.disabled = true;
+                button.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+            
             console.log('Enabling beacon:', beacon);
             try {
                 const res = await fetch(`${API_BASE}/beacon/enable/${beacon.uuid}/${beacon.major}/${beacon.minor}?rssi=${beacon.rssi}`);
@@ -382,10 +410,26 @@
                     const errorText = await res.text();
                     console.error('Enable failed:', errorText);
                     showMessage('Failed to start broadcast.', 'error');
+                    
+                    // Restore button state on error
+                    if (spinner && text) {
+                        spinner.classList.add('hidden');
+                        text.classList.remove('hidden');
+                        button.disabled = false;
+                        button.classList.remove('opacity-75', 'cursor-not-allowed');
+                    }
                 }
             } catch (e) { 
                 console.error('Failed to enable beacon:', e);
-                showMessage('Failed to start broadcast.', 'error'); 
+                showMessage('Failed to start broadcast.', 'error');
+                
+                // Restore button state on error
+                if (spinner && text) {
+                    spinner.classList.add('hidden');
+                    text.classList.remove('hidden');
+                    button.disabled = false;
+                    button.classList.remove('opacity-75', 'cursor-not-allowed');
+                }
             }
         }
 
