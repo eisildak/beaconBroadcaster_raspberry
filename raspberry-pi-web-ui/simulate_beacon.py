@@ -139,6 +139,55 @@ def set_ibeacon_advertisment(uuid, major, minor, rssi=-59, interface='hci0'):
 	subprocess.run((f'sudo hcitool -i {interface} cmd 0x08 0x0008 '+ibeacon_payload).split(), check=True)
 			
 	
+def stop_all_existing_beacons():
+	"""Stop ALL existing beacon broadcasts from any source before starting this program"""
+	print("🧹 Cleaning up all existing beacon broadcasts...")
+	
+	try:
+		# Get list of all available Bluetooth interfaces
+		result = subprocess.run(['hciconfig'], capture_output=True, text=True, check=False)
+		interfaces = []
+		
+		for line in result.stdout.split('\n'):
+			if 'hci' in line and ':' in line:
+				interface = line.split(':')[0].strip()
+				interfaces.append(interface)
+		
+		if not interfaces:
+			interfaces = ['hci0']  # Fallback to default
+		
+		print(f"  📡 Found interfaces: {', '.join(interfaces)}")
+		
+		# Stop advertising on ALL interfaces
+		for interface in interfaces:
+			print(f"  🛑 Stopping all broadcasts on {interface}...")
+			
+			# Aggressively disable advertising (repeat 3 times for certainty)
+			for attempt in range(3):
+				try:
+					# HCI command to disable advertising
+					subprocess.run(f'sudo hcitool -i {interface} cmd 0x08 0x000a 00'.split(), 
+								   check=False, capture_output=True, timeout=2)
+					time.sleep(0.1)
+				except Exception:
+					pass
+			
+			# Reset interface
+			try:
+				subprocess.run(['sudo', 'hciconfig', interface, 'down'], 
+							   check=False, capture_output=True, timeout=2)
+				time.sleep(0.2)
+				subprocess.run(['sudo', 'hciconfig', interface, 'up'], 
+							   check=False, capture_output=True, timeout=2)
+				time.sleep(0.2)
+			except Exception:
+				pass
+		
+		print("✅ All existing beacon broadcasts stopped")
+		
+	except Exception as e:
+		print(f"⚠️  Cleanup warning (continuing anyway): {e}")
+
 def restart_ble(interface='hci0'):
 	subprocess.run(f'sudo hciconfig {interface} down'.split(), check=False)
 	subprocess.run(f'sudo hciconfig {interface} up'.split(), check=False)
@@ -355,6 +404,10 @@ def start_api(args):
 	
 	# Initialize
 	print("🚀 Beacon Broadcaster API Starting...")
+	
+	# CRITICAL: Stop ALL existing beacon broadcasts before starting
+	stop_all_existing_beacons()
+	
 	print(f"📡 API Endpoint: http://0.0.0.0:{args.port}")
 	print(f"🌐 Web UI: http://0.0.0.0:{args.port}/ (if index.html exists)")
 	print(f"🔧 Bluetooth Interface: {args.bluetooth_interface}")
