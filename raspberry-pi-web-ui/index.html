@@ -332,12 +332,13 @@
                         </div>
                         <div class="flex gap-2 mt-4 md:mt-0">
                             ${isActive ? `
-                                <button onclick="stopSpecificBeacon(${index})" class="bg-red-50 hover:bg-red-100 text-red-600 px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px] active:scale-95">
-                                    Stop
+                                <button onclick="stopSpecificBeacon(${index})" id="stop-btn-${index}" class="bg-red-50 hover:bg-red-100 text-red-600 px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px] active:scale-95 flex items-center justify-center gap-2">
+                                    <span>Stop</span>
+                                    <div class="spinner hidden"></div>
                                 </button>
                             ` : `
                                 <button onclick="enableBeacon(${index})" id="enable-btn-${index}" class="hootsuite-green text-white shadow-md active:scale-95 px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px] flex items-center justify-center gap-2">
-                                    <span class="enable-text">Enable</span>
+                                    <span>Enable</span>
                                     <div class="spinner hidden"></div>
                                 </button>
                             `}
@@ -387,12 +388,10 @@
             const beacon = savedBeacons[index];
             const button = document.getElementById(`enable-btn-${index}`);
             const spinner = button?.querySelector('.spinner');
-            const text = button?.querySelector('.enable-text');
             
-            // Show spinner, hide text
-            if (spinner && text) {
+            // Show spinner
+            if (spinner) {
                 spinner.classList.remove('hidden');
-                text.classList.add('hidden');
                 button.disabled = true;
                 button.classList.add('opacity-75', 'cursor-not-allowed');
             }
@@ -411,10 +410,9 @@
                     console.error('Enable failed:', errorText);
                     showMessage('Failed to start broadcast.', 'error');
                     
-                    // Restore button state on error
-                    if (spinner && text) {
+                    // Restore button on error
+                    if (spinner) {
                         spinner.classList.add('hidden');
-                        text.classList.remove('hidden');
                         button.disabled = false;
                         button.classList.remove('opacity-75', 'cursor-not-allowed');
                     }
@@ -423,10 +421,9 @@
                 console.error('Failed to enable beacon:', e);
                 showMessage('Failed to start broadcast.', 'error');
                 
-                // Restore button state on error
-                if (spinner && text) {
+                // Restore button on error
+                if (spinner) {
                     spinner.classList.add('hidden');
-                    text.classList.remove('hidden');
                     button.disabled = false;
                     button.classList.remove('opacity-75', 'cursor-not-allowed');
                 }
@@ -456,6 +453,16 @@
 
         async function stopSpecificBeacon(index) {
             const beacon = savedBeacons[index];
+            const button = document.getElementById(`stop-btn-${index}`);
+            const spinner = button?.querySelector('.spinner');
+            
+            // Show spinner
+            if (spinner) {
+                spinner.classList.remove('hidden');
+                button.disabled = true;
+                button.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+            
             console.log('Stopping specific beacon:', beacon);
             try {
                 const res = await fetch(`${API_BASE}/beacon/disable/${beacon.uuid}/${beacon.major}/${beacon.minor}`);
@@ -469,10 +476,24 @@
                     const errorText = await res.text();
                     console.error('Stop failed:', errorText);
                     showMessage('Failed to stop beacon.', 'error');
+                    
+                    // Restore button on error
+                    if (spinner) {
+                        spinner.classList.add('hidden');
+                        button.disabled = false;
+                        button.classList.remove('opacity-75', 'cursor-not-allowed');
+                    }
                 }
             } catch (e) { 
                 console.error('Failed to stop beacon:', e);
-                showMessage('Failed to stop beacon.', 'error'); 
+                showMessage('Failed to stop beacon.', 'error');
+                
+                // Restore button on error
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                    button.disabled = false;
+                    button.classList.remove('opacity-75', 'cursor-not-allowed');
+                }
             }
         }
 
