@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beacon Broadcaster Raspberry - Control Center</title>
+    <title>Raspberry Pi Beacon - Setup Wizard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -17,30 +17,6 @@
         .hootsuite-green:hover { background-color: #269a6a; }
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3); }
         
-        @keyframes pulse-ring {
-            0% { transform: scale(0.33); opacity: 1; }
-            80%, 100% { opacity: 0; }
-        }
-        .status-pulse {
-            position: relative;
-            display: inline-flex;
-            border-radius: 50%;
-            height: 10px;
-            width: 10px;
-            background-color: #2fb67e;
-        }
-        .status-pulse::after {
-            content: '';
-            position: absolute;
-            width: 300%;
-            height: 300%;
-            left: -100%;
-            top: -100%;
-            border-radius: 50%;
-            background-color: #2fb67e;
-            animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
         .input-field {
             background-color: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -52,8 +28,7 @@
         .input-field:focus {
             outline: none;
             border-color: #3b82f6;
-            ring: 2px;
-            ring-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         
         /* Custom scrollbar */
@@ -64,392 +39,290 @@
     </style>
 </head>
 <body class="min-h-screen antialiased">
-    <!-- Navigation Bar -->
-    <nav class="border-b border-slate-800 bg-[#0f172a]/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <h1 class="text-xl font-bold tracking-tight text-white">Beacon Broadcaster Raspberry</h1>
+    <div class="container mx-auto px-4 py-12 max-w-2xl">
+        <div class="hootsuite-dark rounded-2xl card-shadow overflow-hidden border border-slate-700">
+            <!-- Header -->
+            <div class="border-b border-slate-700 p-8">
+                <h1 class="text-4xl font-bold mb-2 text-white">Beacon Broadcaster Raspberry</h1>
+                <p class="text-slate-400">Setup Wizard - Configure Your Raspberry Pi</p>
             </div>
-            <div id="connection-status" class="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-full border border-slate-800">
-                <div class="status-pulse"></div>
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">System Active</span>
+
+            <!-- Form -->
+            <div class="p-8">
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold border border-blue-500/30">1</div>
+                        <h2 class="text-2xl font-semibold text-slate-200">Raspberry Pi Information</h2>
+                    </div>
+                    <p class="text-slate-400 ml-13">Enter your SSH connection details</p>
+                </div>
+
+                <form id="setup-form" class="space-y-6">
+                    <!-- Raspberry Pi IP -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            Raspberry Pi IP Adresi *
+                        </label>
+                        <input type="text" id="rpi-ip" required
+                               value=""
+                               placeholder="e.g., 192.1xx.x.xxx"
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">Your Raspberry Pi's local network IP address</p>
+                    </div>
+
+                    <!-- SSH Username -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            SSH Username *
+                        </label>
+                        <input type="text" id="rpi-user" required
+                               value=""
+                               placeholder="e.g., pi"
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">The username you use to SSH into your Raspberry Pi</p>
+                    </div>
+
+                    <!-- SSH Password -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            SSH Password *
+                        </label>
+                        <input type="password" id="rpi-password" required
+                               value=""
+                               placeholder="Your SSH password"
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">Password for SSH connection</p>
+                    </div>
+
+                    <!-- Project Directory -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            Project Directory *
+                        </label>
+                        <input type="text" id="rpi-dir" required
+                               value="pointr-beacon-simulator"
+                               placeholder="e.g., pointr-beacon-simulator"
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">Directory name of beacon simulator on Raspberry Pi</p>
+                    </div>
+
+                    <!-- Port -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            API Port
+                        </label>
+                        <input type="number" id="rpi-port"
+                               value="8000"
+                               min="1000" max="65535"
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">Port where beacon API will run (usually 8000)</p>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button type="submit"
+                            class="w-full hootsuite-green text-white font-semibold py-4 px-6 rounded-lg shadow-lg transform transition hover:scale-105">
+                        ⚙️ Generate Deployment Package
+                    </button>
+                </form>
             </div>
-        </div>
-    </nav>
 
-    <main class="container mx-auto px-6 py-8 max-w-6xl">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <!-- Left Column: Current Status and Form -->
-            <div class="lg:col-span-5 space-y-6">
-                <!-- Live Broadcasting Card -->
-                <div class="hootsuite-dark rounded-2xl p-6 card-shadow border border-slate-700 relative overflow-hidden group">
-                    <div class="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+            <!-- Result Section -->
+            <div id="result-section" class="hidden p-8 bg-slate-900/50 border-t border-slate-700">
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center text-green-400 font-bold border border-green-500/30">✓</div>
+                        <h2 class="text-2xl font-semibold text-slate-200">Ready!</h2>
                     </div>
-                    
-                    <div class="flex items-center justify-center mb-6 relative">
-                        <h2 class="text-xs font-black text-blue-400 uppercase tracking-[0.2em]">Live Broadcasting Status</h2>
-                        <div id="live-indicator" class="hidden absolute right-0">
-                            <span class="bg-red-500/10 text-red-500 text-[10px] font-black px-2 py-1 rounded border border-red-500/20">LIVE</span>
-                        </div>
-                    </div>
-
-                    <div id="current-beacon-info" class="space-y-4">
-                        <p class="text-slate-500 italic text-sm">Scanning for active signal...</p>
+                    <p class="text-slate-400 ml-13 mb-3">Your deployment files have been generated</p>
+                    <div class="flex items-start gap-2 text-sm text-amber-300 bg-amber-500/10 rounded p-3 ml-13 border border-amber-500/20">
+                        <span>⏱️</span>
+                        <p><strong>Note:</strong> After running the command in the terminal, wait a few seconds to enter the password when prompted.</p>
                     </div>
                 </div>
 
-                <!-- New Beacon Configuration Form -->
-                <div class="bg-white rounded-2xl p-6 card-shadow border border-slate-200">
-                    <h2 class="text-slate-900 text-lg font-bold mb-6 flex items-center gap-2">
-                        Configure New Beacon
-                    </h2>
-                    <form id="add-beacon-form" class="space-y-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">Name (Friendly Name)</label>
-                            <input type="text" id="beacon-name" required class="w-full input-field" placeholder="e.g., Office Entrance">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">UUID</label>
-                            <input type="text" id="beacon-uuid" required class="w-full input-field font-mono text-sm" placeholder="FDA50693-A4E2-4FB1-AFCF-C6EB07647825">
-                        </div>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">Major</label>
-                                <input type="number" id="beacon-major" value="1" min="0" max="65535" class="w-full input-field">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">Minor</label>
-                                <input type="number" id="beacon-minor" value="1" min="0" max="65535" class="w-full input-field">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1">Power</label>
-                                <input type="number" id="beacon-rssi" value="-59" min="-100" max="20" class="w-full input-field">
-                            </div>
-                        </div>
-                        <button type="submit" class="hootsuite-green w-full text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/20 transform active:scale-[0.98] transition-all mt-2">
-                            Add Beacon
-                        </button>
-                    </form>
+                <!-- Instructions -->
+                <div class="bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-700">
+                    <h3 class="font-bold text-lg mb-3 text-slate-200">📋 Installation Steps</h3>
+                    <ol class="space-y-3 text-sm text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-blue-400 min-w-6">1.</span>
+                            <span>Download the files below and save them to <code class="bg-slate-900 px-2 py-1 rounded text-blue-300">raspberry-pi-web-ui</code> folder</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-blue-400 min-w-6">2.</span>
+                            <span>Navigate to folder in Terminal: <code class="bg-slate-900 px-2 py-1 rounded text-blue-300">cd raspberry-pi-web-ui</code></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-blue-400 min-w-6">3.</span>
+                            <span>Run deploy script: <code class="bg-slate-900 px-2 py-1 rounded text-blue-300">chmod +x deploy.sh && ./deploy.sh</code></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-blue-400 min-w-6">4.</span>
+                            <span>Open Web UI: <code id="web-url" class="bg-slate-900 px-2 py-1 rounded text-blue-300"></code></span>
+                        </li>
+                    </ol>
                 </div>
-            </div>
 
-            <!-- Right Column: Saved Configurations -->
-            <div class="lg:col-span-7">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-baseline gap-2">
-                        <h2 class="text-2xl font-bold text-white">Registry</h2>
-                        <span class="text-slate-500 text-xs font-medium">| <span id="beacon-count">0</span> configurations</span>
-                    </div>
-                    <button onclick="loadBeacons()" class="p-2 text-slate-400 hover:text-white transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <!-- Download Buttons -->
+                <div class="space-y-3">
+                    <button onclick="downloadDeployScript()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 shadow-lg">
+                        <span>⬇️</span>
+                        <span>Download deploy.sh (Deployment Script)</span>
+                    </button>
+                    <button onclick="downloadIndexHTML()" class="w-full hootsuite-green text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 shadow-lg">
+                        <span>⬇️</span>
+                        <span>Download index-configured.html (Web UI - Configured)</span>
+                    </button>
+                    <button onclick="window.location.reload()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition">
+                        🔄 Create New Configuration
                     </button>
                 </div>
-
-                <div id="beacons-list" class="space-y-4">
-                    <!-- Dynamic Content -->
-                    <div class="animate-pulse space-y-4">
-                        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
-                        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
-                    </div>
-                </div>
             </div>
         </div>
-    </main>
 
-    <footer class="container mx-auto px-6 py-12 border-t border-slate-800 mt-12 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="text-slate-500 text-xs">
-            RPi Station: <span id="pi-address" class="text-slate-300 font-mono bg-slate-800 px-2 py-1 rounded">192.168.1.180</span>
-        </div>
-        <div class="text-slate-600 text-[10px] font-bold uppercase tracking-widest">
-            Manual Control Center &bull; v2.0
-        </div>
-    </footer>
-
-    <!-- Custom Notification System -->
-    <div id="notification" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-[100]">
-        <div class="bg-slate-900 border border-slate-700 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
-            <div id="notif-icon" class="w-2 h-2 rounded-full bg-blue-500"></div>
-            <p id="notif-message" class="text-sm font-medium"></p>
+        <!-- Footer -->
+        <div class="text-center mt-8 text-slate-400 text-sm">
+            <p>Beacon Broadcaster - Universal Setup Wizard</p>
+            <p class="mt-1 text-slate-500">Anyone can use with their own Raspberry Pi</p>
         </div>
     </div>
 
     <script>
-        const API_BASE = window.location.origin;
-        let currentBeacons = [];  // Array of currently active beacons (multi-beacon support)
-        let savedBeacons = [];
+        let config = {};
 
-        function showMessage(msg, type = 'info') {
-            const notif = document.getElementById('notification');
-            const icon = document.getElementById('notif-icon');
-            document.getElementById('notif-message').innerText = msg;
-            
-            icon.className = `w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-emerald-500'}`;
-            
-            notif.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                notif.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-
-        async function init() {
-            await loadBeacons();
-            await checkCurrentBeacon();
-            setInterval(checkCurrentBeacon, 3000);
-        }
-
-        async function loadBeacons() {
-            try {
-                const response = await fetch(`${API_BASE}/beacon/list`);
-                if (response.ok) {
-                    savedBeacons = await response.json();
-                    document.getElementById('beacon-count').innerText = savedBeacons.length;
-                    renderBeacons();
-                }
-            } catch (e) { 
-                console.error('Failed to load list:', e); 
-            }
-        }
-
-        async function checkCurrentBeacon() {
-            try {
-                const response = await fetch(`${API_BASE}/beacon`);
-                if (response.ok) {
-                    currentBeacons = await response.json();
-                    updateCurrentBeaconUI();
-                }
-            } catch (e) {
-                document.getElementById('connection-status').innerHTML = '<span class="text-red-500 text-[10px] font-black italic uppercase">NO CONNECTION</span>';
-            }
-        }
-
-        function updateCurrentBeaconUI() {
-            const container = document.getElementById('current-beacon-info');
-            const indicator = document.getElementById('live-indicator');
-            
-            if (currentBeacons && currentBeacons.length > 0) {
-                indicator.classList.remove('hidden');
-                
-                if (currentBeacons.length === 1) {
-                    // Single beacon
-                    const beacon = currentBeacons[0];
-                    container.innerHTML = `
-                        <div class="space-y-4">
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-4xl font-bold text-white tracking-tighter">${beacon.major}:${beacon.minor}</span>
-                                <span class="text-slate-500 text-xs font-mono">${beacon.rssi} dBm</span>
-                            </div>
-                            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
-                                <p class="text-[10px] font-black text-slate-500 uppercase mb-1">Device UUID</p>
-                                <p class="font-mono text-xs text-blue-400 break-all leading-relaxed">${beacon.uuid}</p>
-                            </div>
-                            <button onclick="stopAllBeacons()" class="mt-4 w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 py-2.5 rounded-xl font-bold text-sm transition-colors">
-                                Stop Broadcasting
-                            </button>
-                        </div>
-                    `;
-                } else {
-                    // Multiple beacons - show count and list
-                    const beaconsHtml = currentBeacons.map((beacon, idx) => `
-                        <div class="bg-black/20 p-3 rounded-lg border border-emerald-500/20 flex items-center justify-between">
-                            <div>
-                                <span class="text-white font-bold">${beacon.major}:${beacon.minor}</span>
-                                <span class="text-slate-500 text-xs ml-2">${beacon.rssi} dBm</span>
-                            </div>
-                            <span class="text-emerald-400 text-[10px] font-bold">LIVE</span>
-                        </div>
-                    `).join('');
-                    
-                    container.innerHTML = `
-                        <div class="space-y-3">
-                            <div class="flex items-baseline gap-2 mb-3">
-                                <span class="text-2xl font-bold text-white">${currentBeacons.length} Beacons</span>
-                                <span class="text-slate-500 text-xs">Multiplexing Active</span>
-                            </div>
-                            <div class="space-y-2 max-h-64 overflow-y-auto">
-                                ${beaconsHtml}
-                            </div>
-                            <button onclick="stopAllBeacons()" class="mt-4 w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 py-2.5 rounded-xl font-bold text-sm transition-colors">
-                                Stop All Broadcasting
-                            </button>
-                        </div>
-                    `;
-                }
-            } else {
-                indicator.classList.add('hidden');
-                container.innerHTML = `
-                    <div class="py-6 text-center">
-                        <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        </div>
-                        <p class="text-slate-500 text-sm font-medium">No active broadcast at the moment.</p>
-                    </div>
-                `;
-            }
-        }
-
-        function renderBeacons() {
-            const container = document.getElementById('beacons-list');
-            if (savedBeacons.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-16 border-2 border-dashed border-slate-800 rounded-3xl">
-                        <p class="text-slate-600 font-medium">No saved configurations yet.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = savedBeacons.map((beacon, index) => {
-                const isActive = currentBeacons.some(cb => cb.uuid === beacon.uuid && cb.major === beacon.major && cb.minor === beacon.minor);
-                return `
-                    <div class="bg-white rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between transition-all hover:shadow-xl hover:-translate-y-1 ${isActive ? 'ring-2 ring-emerald-500 shadow-emerald-500/10' : 'shadow-sm border border-slate-100'}">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                <h3 class="text-slate-900 font-bold text-base">${beacon.name}</h3>
-                                ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>' : ''}
-                            </div>
-                            <div class="flex flex-wrap gap-x-4 gap-y-1">
-                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">ID: <span class="text-slate-900 font-mono">${beacon.major} / ${beacon.minor}</span></span>
-                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Power: <span class="text-slate-900">${beacon.rssi}dBm</span></span>
-                                <span class="text-[10px] font-black text-blue-500/70 uppercase tracking-tighter font-mono truncate max-w-[150px]">${beacon.uuid}</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-2 mt-4 md:mt-0">
-                            ${isActive ? `
-                                <button onclick="stopSpecificBeacon(${index})" class="bg-red-50 hover:bg-red-100 text-red-600 px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px] active:scale-95">
-                                    Stop
-                                </button>
-                            ` : `
-                                <button onclick="enableBeacon(${index})" class="hootsuite-green text-white shadow-md active:scale-95 px-5 py-2 rounded-xl text-xs font-bold transition-all min-w-[90px]">
-                                    Enable
-                                </button>
-                            `}
-                            <button onclick="deleteBeacon(${index})" class="bg-slate-50 hover:bg-red-50 text-slate-300 hover:text-red-500 p-2 rounded-xl transition-colors border border-slate-100">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        document.getElementById('add-beacon-form').addEventListener('submit', async (e) => {
+        document.getElementById('setup-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            const beacon = {
-                name: document.getElementById('beacon-name').value,
-                uuid: document.getElementById('beacon-uuid').value.trim().toUpperCase(),
-                major: parseInt(document.getElementById('beacon-major').value),
-                minor: parseInt(document.getElementById('beacon-minor').value),
-                rssi: parseInt(document.getElementById('beacon-rssi').value)
+
+            // Get configuration
+            config = {
+                ip: document.getElementById('rpi-ip').value.trim(),
+                user: document.getElementById('rpi-user').value.trim(),
+                password: document.getElementById('rpi-password').value,
+                dir: document.getElementById('rpi-dir').value.trim(),
+                port: document.getElementById('rpi-port').value.trim()
             };
-            
-            try {
-                const response = await fetch(`${API_BASE}/beacon/add`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(beacon)
-                });
-                if (response.ok) {
-                    savedBeacons = await response.json();
-                    document.getElementById('beacon-count').innerText = savedBeacons.length;
-                    renderBeacons();
-                    e.target.reset();
-                    document.getElementById('beacon-major').value = '1';
-                    document.getElementById('beacon-minor').value = '1';
-                    document.getElementById('beacon-rssi').value = '-59';
-                    showMessage('Beacon saved successfully.');
-                } else {
-                    showMessage('Error occurred during save.', 'error');
-                }
-            } catch (e) { 
-                showMessage('Error occurred during save.', 'error'); 
-            }
+
+            // Show result section
+            document.getElementById('result-section').classList.remove('hidden');
+            document.getElementById('web-url').textContent = `http://${config.ip}:${config.port}`;
+
+            // Scroll to result
+            document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
         });
 
-        async function enableBeacon(index) {
-            const beacon = savedBeacons[index];
-            console.log('Enabling beacon:', beacon);
-            try {
-                const res = await fetch(`${API_BASE}/beacon/enable/${beacon.uuid}/${beacon.major}/${beacon.minor}?rssi=${beacon.rssi}`);
-                console.log('Enable response:', res.status);
-                if (res.ok) {
-                    await checkCurrentBeacon();
-                    renderBeacons();
-                    showMessage(`${beacon.name} broadcast started.`);
-                    console.log('Beacon enabled successfully');
-                } else {
-                    const errorText = await res.text();
-                    console.error('Enable failed:', errorText);
-                    showMessage('Failed to start broadcast.', 'error');
-                }
-            } catch (e) { 
-                console.error('Failed to enable beacon:', e);
-                showMessage('Failed to start broadcast.', 'error'); 
-            }
+        function downloadDeployScript() {
+            const script = `#!/bin/bash
+
+# 🚀 Raspberry Pi Beacon Broadcaster - Auto-Generated Deployment Script
+# Generated for: ${config.user}@${config.ip}
+# Date: ${new Date().toLocaleString()}
+
+# Colors
+GREEN='\\033[0;32m'
+BLUE='\\033[0;34m'
+YELLOW='\\033[1;33m'
+RED='\\033[0;31m'
+NC='\\033[0m'
+
+echo -e "\${BLUE}╔════════════════════════════════════════╗\${NC}"
+echo -e "\${BLUE}║  Raspberry Pi Beacon - Deployer       ║\${NC}"
+echo -e "\${BLUE}╚════════════════════════════════════════╝\${NC}"
+echo ""
+
+# Configuration (Auto-generated)
+RPI_USER="${config.user}"
+RPI_IP="${config.ip}"
+RPI_DIR="${config.dir}"
+RPI_PORT="${config.port}"
+RPI_ADDR="\${RPI_USER}@\${RPI_IP}"
+BACKUP_SUFFIX=".backup_$(date +%Y%m%d_%H%M%S)"
+
+echo -e "\${YELLOW}📡 Target:\${NC} \${RPI_ADDR}"
+echo -e "\${YELLOW}📁 Directory:\${NC} ~/\${RPI_DIR}"
+echo -e "\${YELLOW}🔌 Port:\${NC} \${RPI_PORT}"
+echo ""
+
+# Check files
+if [ ! -f "index-configured.html" ]; then
+    echo -e "\${RED}❌ Error: index-configured.html not found\${NC}"
+    echo -e "\${YELLOW}Please download it from the setup wizard first\${NC}"
+    exit 1
+fi
+
+if [ ! -f "simulate_beacon.py" ]; then
+    echo -e "\${RED}❌ Error: simulate_beacon.py not found\${NC}"
+    echo -e "\${YELLOW}Please copy it from repository: raspberry-pi-web-ui/simulate_beacon.py\${NC}"
+    exit 1
+fi
+
+echo -e "\${GREEN}1️⃣  Creating backup...\${NC}"
+ssh \${RPI_ADDR} "cp ~/\${RPI_DIR}/simulate_beacon.py ~/\${RPI_DIR}/simulate_beacon.py\${BACKUP_SUFFIX} 2>/dev/null || echo 'No existing file to backup'"
+
+echo -e "\${GREEN}2️⃣  Uploading files...\${NC}"
+scp simulate_beacon.py \${RPI_ADDR}:~/\${RPI_DIR}/
+scp index-configured.html \${RPI_ADDR}:~/\${RPI_DIR}/index.html
+scp beacons_config.json \${RPI_ADDR}:~/\${RPI_DIR}/ 2>/dev/null || echo "[]" | ssh \${RPI_ADDR} "cat > ~/\${RPI_DIR}/beacons_config.json"
+
+echo -e "\${GREEN}3️⃣  Restarting service...\${NC}"
+ssh \${RPI_ADDR} << 'ENDSSH'
+cd ${RPI_DIR}
+screen -X -S beacon_simulator quit 2>/dev/null || true
+sleep 2
+chmod +x simulate_beacon.py run_detached.sh
+./run_detached.sh
+sleep 2
+if screen -list | grep -q "beacon_simulator"; then
+    echo "✅ Service started successfully!"
+else
+    echo "⚠️  Check service: screen -r beacon_simulator"
+fi
+ENDSSH
+
+echo ""
+echo -e "\${GREEN}╔════════════════════════════════════════╗\${NC}"
+echo -e "\${GREEN}║        Deployment Complete! 🎉         ║\${NC}"
+echo -e "\${GREEN}╚════════════════════════════════════════╝\${NC}"
+echo ""
+echo -e "\${BLUE}🌐 Web UI:\${NC} http://\${RPI_IP}:\${RPI_PORT}"
+echo -e "\${BLUE}📡 API:\${NC}    http://\${RPI_IP}:\${RPI_PORT}/beacon"
+echo ""
+echo -e "\${GREEN}✅ Ready to use!\${NC}"
+`;
+
+            downloadFile('deploy.sh', script);
         }
 
-        async function stopAllBeacons() {
-            console.log('Stopping all beacons...');
-            try {
-                const res = await fetch(`${API_BASE}/beacon/disable`);
-                console.log('Stop response:', res.status);
-                if (res.ok) {
-                    await checkCurrentBeacon();
-                    renderBeacons();
-                    showMessage('All broadcasts stopped.');
-                    console.log('All beacons stopped successfully');
-                } else {
-                    const errorText = await res.text();
-                    console.error('Stop failed:', errorText);
-                    showMessage('Failed to stop.', 'error');
-                }
-            } catch (e) { 
-                console.error('Failed to stop beacons:', e);
-                showMessage('Failed to stop.', 'error'); 
-            }
+        function downloadIndexHTML() {
+            fetch('index.html')
+                .then(response => response.text())
+                .then(html => {
+                    // Configure HTML with user's Raspberry Pi IP
+                    const configured = html.replace(
+                        'const API_BASE = window.location.origin;',
+                        `const API_BASE = 'http://${config.ip}:${config.port}';`
+                    ).replace(
+                        '<span id="pi-address">192.168.1.180</span>',
+                        `<span id="pi-address">${config.ip}</span>`
+                    );
+                    
+                    downloadFile('index-configured.html', configured);
+                })
+                .catch(() => {
+                    alert('index.html file not found. Please ensure the file is in the same folder.');
+                });
         }
 
-        async function stopSpecificBeacon(index) {
-            const beacon = savedBeacons[index];
-            console.log('Stopping specific beacon:', beacon);
-            try {
-                const res = await fetch(`${API_BASE}/beacon/disable/${beacon.uuid}/${beacon.major}/${beacon.minor}`);
-                console.log('Stop response:', res.status);
-                if (res.ok) {
-                    await checkCurrentBeacon();
-                    renderBeacons();
-                    showMessage(`${beacon.name} stopped.`);
-                    console.log('Beacon stopped successfully');
-                } else {
-                    const errorText = await res.text();
-                    console.error('Stop failed:', errorText);
-                    showMessage('Failed to stop beacon.', 'error');
-                }
-            } catch (e) { 
-                console.error('Failed to stop beacon:', e);
-                showMessage('Failed to stop beacon.', 'error'); 
-            }
+        function downloadFile(filename, content) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
         }
-
-        async function deleteBeacon(index) {
-            try {
-                const response = await fetch(`${API_BASE}/beacon/delete/${index}`, { method: 'DELETE' });
-                if (response.ok) {
-                    savedBeacons = await response.json();
-                    document.getElementById('beacon-count').innerText = savedBeacons.length;
-                    renderBeacons();
-                    showMessage('Configuration deleted.');
-                } else {
-                    showMessage('Failed to delete.', 'error');
-                }
-            } catch (e) { 
-                console.error('Failed to delete beacon:', e);
-                showMessage('Failed to delete.', 'error'); 
-            }
-        }
-
-        init();
     </script>
 </body>
 </html>
