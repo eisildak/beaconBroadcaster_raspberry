@@ -5,294 +5,175 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raspberry Pi Beacon - Setup Wizard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        @keyframes pulse-glow {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
-                transform: scale(1);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(168, 85, 247, 0.5);
-                transform: scale(1.02);
-            }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0f172a; 
+            color: #f1f5f9;
         }
-        .pulse-glow-btn {
-            animation: pulse-glow 2s ease-in-out infinite;
+        .hootsuite-dark { background-color: #1e293b; }
+        .hootsuite-green { background-color: #2fb67e; }
+        .hootsuite-green:hover { background-color: #269a6a; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3); }
+        
+        .input-field {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #1e293b;
+            transition: all 0.2s;
         }
-        .info-tooltip {
-            display: none;
-            position: absolute;
-            background: #1e293b;
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            line-height: 1.5;
-            width: 320px;
-            z-index: 1000;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
-        .info-tooltip.tooltip-top {
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-bottom: 8px;
-        }
-        .info-tooltip.tooltip-top::before {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: #1e293b;
-        }
-        .info-tooltip.tooltip-bottom {
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-top: 8px;
-        }
-        .info-tooltip.tooltip-bottom::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-bottom-color: #1e293b;
-        }
-        .info-btn:hover .info-tooltip {
-            display: block;
-        }
-        .info-btn {
-            position: relative;
-            cursor: help;
-            flex-shrink: 0;
-        }
-        label {
-            cursor: default !important;
-            pointer-events: none;
-        }
-        label + input,
-        label + button,
-        input {
-            pointer-events: auto;
-        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 min-h-screen">
-    <div class="container mx-auto px-4 py-12 max-w-4xl">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+<body class="min-h-screen antialiased">
+    <div class="container mx-auto px-4 py-12 max-w-2xl">
+        <div class="hootsuite-dark rounded-2xl card-shadow overflow-hidden border border-slate-700">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
-                <div class="flex items-center gap-4 mb-2">
-                    <img src="assets/play_store_512.png" alt="Beacon Broadcaster" class="w-16 h-16 rounded-lg shadow-lg">
-                    <h1 class="text-4xl font-bold">Beacon Broadcaster</h1>
-                </div>
-                <p class="text-blue-100">Setup Wizard - Configure Your Raspberry Pi</p>
+            <div class="border-b border-slate-700 p-8">
+                <h1 class="text-4xl font-bold mb-2 text-white">Beacon Broadcaster Raspberry</h1>
+                <p class="text-slate-400">Setup Wizard - Configure Your Raspberry Pi</p>
             </div>
 
             <!-- Form -->
             <div class="p-8">
                 <div class="mb-6">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">1</div>
-                        <h2 class="text-2xl font-semibold text-gray-800">Raspberry Pi Information</h2>
+                        <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold border border-blue-500/30">1</div>
+                        <h2 class="text-2xl font-semibold text-slate-200">Raspberry Pi Information</h2>
                     </div>
-                    <p class="text-gray-600 ml-13">Enter your SSH connection details</p>
+                    <p class="text-slate-400 ml-13">Enter your SSH connection details</p>
                 </div>
 
                 <form id="setup-form" class="space-y-6">
                     <!-- Raspberry Pi IP -->
                     <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <label for="rpi-ip" class="block text-sm font-medium text-gray-700">
-                                Raspberry Pi IP Adresi *
-                            </label>
-                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
-                                ?
-                                <div class="info-tooltip tooltip-bottom">
-                                    <strong class="block mb-1">📍 Finding Your Raspberry Pi IP Address:</strong>
-                                    Open terminal on your Raspberry Pi and run:
-                                    <code class="block bg-black/30 px-2 py-1 rounded mt-2 mb-2 font-mono text-xs">hostname -I</code>
-                                    Or check connected devices in your router settings.
-                                </div>
-                            </button>
-                        </div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            Raspberry Pi IP Adresi *
+                        </label>
                         <input type="text" id="rpi-ip" required
                                value=""
                                placeholder="e.g., 192.1xx.x.xxx"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">Your Raspberry Pi's local network IP address</p>
                     </div>
 
                     <!-- SSH Username -->
                     <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <label for="rpi-user" class="block text-sm font-medium text-gray-700">
-                                SSH Username *
-                            </label>
-                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
-                                ?
-                                <div class="info-tooltip tooltip-bottom">
-                                    <strong class="block mb-1">👤 SSH Username:</strong>
-                                    The username you set when you first installed your Raspberry Pi. 
-                                    <br><br>
-                                    <strong>Default value:</strong> <code class="bg-black/30 px-2 py-0.5 rounded">pi</code>
-                                    <br><br>
-                                    If you set a custom name during setup (e.g., admin), enter that.
-                                </div>
-                            </button>
-                        </div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            SSH Username *
+                        </label>
                         <input type="text" id="rpi-user" required
                                value=""
                                placeholder="e.g., pi"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">The username you use to SSH into your Raspberry Pi</p>
+                    </div>
+
+                    <!-- SSH Password -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            SSH Password *
+                        </label>
+                        <input type="password" id="rpi-password" required
+                               value=""
+                               placeholder="Your SSH password"
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">Password for SSH connection</p>
                     </div>
 
                     <!-- Project Directory -->
                     <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <label for="rpi-dir" class="block text-sm font-medium text-gray-700">
-                                Project Directory *
-                            </label>
-                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
-                                ?
-                                <div class="info-tooltip tooltip-top">
-                                    <strong class="block mb-1">📁 Project Directory Name:</strong>
-                                    The folder name where beacon simulator files will be stored on your Raspberry Pi.
-                                    <br><br>
-                                    <strong>Important:</strong> If you're using a different folder name, change it. Otherwise, <strong>keep the default value</strong>.
-                                    <br><br>
-                                    This folder will be created automatically.
-                                </div>
-                            </button>
-                        </div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            Project Directory *
+                        </label>
                         <input type="text" id="rpi-dir" required
                                value="pointr-beacon-simulator"
                                placeholder="e.g., pointr-beacon-simulator"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">Directory name of beacon simulator on Raspberry Pi</p>
                     </div>
 
                     <!-- Port -->
                     <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <label for="rpi-port" class="block text-sm font-medium text-gray-700">
-                                API Port
-                            </label>
-                            <button type="button" class="info-btn inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 transition">
-                                ?
-                                <div class="info-tooltip tooltip-top">
-                                    <strong class="block mb-1">🔌 API Port Number:</strong>
-                                    The port number where the web interface will run.
-                                    <br><br>
-                                    <strong>Default:</strong> <code class="bg-black/30 px-2 py-0.5 rounded">8000</code>
-                                    <br><br>
-                                    ⚠️ <strong>Don't change this unless you specifically modified it.</strong> If you're using a different port (e.g., 5000, 3000), enter that value.
-                                </div>
-                            </button>
-                        </div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            API Port
+                        </label>
                         <input type="number" id="rpi-port"
                                value="8000"
                                min="1000" max="65535"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="input-field w-full">
+                        <p class="mt-1 text-sm text-slate-500">Port where beacon API will run (usually 8000)</p>
                     </div>
 
                     <!-- Generate Button -->
                     <button type="submit"
-                            class="pulse-glow-btn w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-lg transform transition hover:scale-105">
+                            class="w-full hootsuite-green text-white font-semibold py-4 px-6 rounded-lg shadow-lg transform transition hover:scale-105">
                         ⚙️ Generate Deployment Package
                     </button>
                 </form>
             </div>
 
             <!-- Result Section -->
-            <div id="result-section" class="hidden p-8 bg-gray-50 border-t border-gray-200">
+            <div id="result-section" class="hidden p-8 bg-slate-900/50 border-t border-slate-700">
                 <div class="mb-6">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">✓</div>
-                        <h2 class="text-2xl font-semibold text-gray-800">Ready!</h2>
+                        <div class="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center text-green-400 font-bold border border-green-500/30">✓</div>
+                        <h2 class="text-2xl font-semibold text-slate-200">Ready!</h2>
                     </div>
-                    <p class="text-gray-600 ml-13 mb-3">Your deployment files have been generated</p>
-                    <div class="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 rounded p-3 ml-13">
+                    <p class="text-slate-400 ml-13 mb-3">Your deployment files have been generated</p>
+                    <div class="flex items-start gap-2 text-sm text-amber-300 bg-amber-500/10 rounded p-3 ml-13 border border-amber-500/20">
                         <span>⏱️</span>
-                        <p><strong>Note:</strong> After pasting the command, you'll need to enter your Raspberry Pi password. Wait a few seconds for the prompt.</p>
-                    </div>
-                </div>
-
-                <!-- Important Notice -->
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-                    <div class="flex items-start gap-3">
-                        <div class="text-2xl">⚠️</div>
-                        <div>
-                            <p class="font-semibold text-yellow-800 mb-1">Quick Deploy Options</p>
-                            <p class="text-sm text-yellow-700">
-                                Choose your preferred method below. <strong>One-liner command</strong> is the fastest!
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- One-Liner Command (Primary Method) -->
-                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-5 mb-6">
-                    <h3 class="font-bold text-lg mb-3 text-blue-900 flex items-center gap-2">
-                        <span class="text-2xl">⚡</span>
-                        Fastest: One-Line Deploy Command
-                    </h3>
-                    <p class="text-sm text-blue-800 mb-3">Copy and paste this command in your terminal:</p>
-                    <div class="bg-gray-900 rounded-lg p-4 mb-3 relative">
-                        <code id="one-liner-command" class="text-green-400 text-xs font-mono break-all">
-                            # Command will be generated here
-                        </code>
-                        <button onclick="copyOneLiner()" class="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition">
-                            Copy
-                        </button>
-                    </div>
-                    <div class="flex items-start gap-2 text-xs text-blue-700 mb-2">
-                        <span>💡</span>
-                        <p>Just open Terminal and paste! No downloads needed. Web UI opens automatically when done.</p>
-                    </div>
-                    <div class="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 rounded p-2">
-                        <span>⏱️</span>
-                        <p><strong>Note:</strong> After pasting the command, you'll need to enter your Raspberry Pi password. Wait a few seconds for the prompt.</p>
+                        <p><strong>Note:</strong> After running the command in the terminal, wait a few seconds to enter the password when prompted.</p>
                     </div>
                 </div>
 
                 <!-- Instructions -->
-                <div class="bg-white rounded-lg p-6 mb-6 border border-gray-200">
-                    <h3 class="font-bold text-lg mb-3 text-gray-800">📋 Alternative: Download & Run Script</h3>
-                    <p class="text-sm text-gray-600 mb-3">If you prefer downloading files:</p>
-                    <ol class="space-y-3 text-sm text-gray-700">
+                <div class="bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-700">
+                    <h3 class="font-bold text-lg mb-3 text-slate-200">📋 Installation Steps</h3>
+                    <ol class="space-y-3 text-sm text-slate-300">
                         <li class="flex items-start gap-2">
-                            <span class="font-bold text-blue-600 min-w-6">1.</span>
-                            <span>Download the files below and save them to <code class="bg-gray-100 px-2 py-1 rounded">raspberry-pi-web-ui</code> folder</span>
+                            <span class="font-bold text-blue-400 min-w-6">1.</span>
+                            <span>Download the files below and save them to <code class="bg-slate-900 px-2 py-1 rounded text-blue-300">raspberry-pi-web-ui</code> folder</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <span class="font-bold text-blue-600 min-w-6">2.</span>
-                            <span>Navigate to folder in Terminal: <code class="bg-gray-100 px-2 py-1 rounded">cd raspberry-pi-web-ui</code></span>
+                            <span class="font-bold text-blue-400 min-w-6">2.</span>
+                            <span>Navigate to folder in Terminal: <code class="bg-slate-900 px-2 py-1 rounded text-blue-300">cd raspberry-pi-web-ui</code></span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <span class="font-bold text-blue-600 min-w-6">3.</span>
-                            <span>Run deploy script: <code class="bg-gray-100 px-2 py-1 rounded">chmod +x deploy.sh && ./deploy.sh</code></span>
+                            <span class="font-bold text-blue-400 min-w-6">3.</span>
+                            <span>Run deploy script: <code class="bg-slate-900 px-2 py-1 rounded text-blue-300">chmod +x deploy.sh && ./deploy.sh</code></span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <span class="font-bold text-green-600 min-w-6">4.</span>
-                            <span><strong>Web UI will open automatically</strong> after deployment completes at: <code id="web-url" class="bg-gray-100 px-2 py-1 rounded"></code></span>
+                            <span class="font-bold text-blue-400 min-w-6">4.</span>
+                            <span>Open Web UI: <code id="web-url" class="bg-slate-900 px-2 py-1 rounded text-blue-300"></code></span>
                         </li>
                     </ol>
                 </div>
 
                 <!-- Download Buttons -->
                 <div class="space-y-3">
-                    <button onclick="downloadDeployScript()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-4 rounded-lg transition transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg">
+                    <button onclick="downloadDeployScript()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 shadow-lg">
                         <span>⬇️</span>
-                        <span>1. Download deploy.sh (Run This First!)</span>
+                        <span>Download deploy.sh (Deployment Script)</span>
                     </button>
-                    <button onclick="downloadIndexHTML()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                    <button onclick="downloadIndexHTML()" class="w-full hootsuite-green text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 shadow-lg">
                         <span>⬇️</span>
-                        <span>2. Download index-configured.html (Web UI)</span>
+                        <span>Download index-configured.html (Web UI - Configured)</span>
                     </button>
-                    <button onclick="window.location.reload()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition">
+                    <button onclick="window.location.reload()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition">
                         🔄 Create New Configuration
                     </button>
                 </div>
@@ -300,9 +181,9 @@
         </div>
 
         <!-- Footer -->
-        <div class="text-center mt-8 text-white text-sm">
+        <div class="text-center mt-8 text-slate-400 text-sm">
             <p>Beacon Broadcaster - Universal Setup Wizard</p>
-            <p class="mt-1 text-blue-200">Anyone can use with their own Raspberry Pi</p>
+            <p class="mt-1 text-slate-500">Anyone can use with their own Raspberry Pi</p>
         </div>
     </div>
 
@@ -316,45 +197,18 @@
             config = {
                 ip: document.getElementById('rpi-ip').value.trim(),
                 user: document.getElementById('rpi-user').value.trim(),
+                password: document.getElementById('rpi-password').value,
                 dir: document.getElementById('rpi-dir').value.trim(),
                 port: document.getElementById('rpi-port').value.trim()
             };
 
-            const webUiUrl = `http://${config.ip}:${config.port}`;
-
             // Show result section
             document.getElementById('result-section').classList.remove('hidden');
-            document.getElementById('web-url').textContent = webUiUrl;
-            
-            // Generate one-liner command
-            generateOneLinerCommand(config, webUiUrl);
+            document.getElementById('web-url').textContent = `http://${config.ip}:${config.port}`;
 
             // Scroll to result
             document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
         });
-
-        function generateOneLinerCommand(config, webUiUrl) {
-            // Create one-line deployment command with single SSH session
-            const oneLiner = `ssh ${config.user}@${config.ip} "mkdir -p ${config.dir} && curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/simulate_beacon.py > ${config.dir}/simulate_beacon.py && curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/index.html > ${config.dir}/index.html && cd ${config.dir} && screen -X -S beacon_simulator quit 2>/dev/null; chmod +x run_detached.sh 2>/dev/null; nohup python3 simulate_beacon.py --port ${config.port} > /dev/null 2>&1 &" && sleep 3 && echo "✅ Deployment complete! Opening Web UI..." && (open ${webUiUrl} 2>/dev/null || xdg-open ${webUiUrl} 2>/dev/null || start ${webUiUrl} 2>/dev/null)`;
-            
-            document.getElementById('one-liner-command').textContent = oneLiner;
-        }
-
-        function copyOneLiner() {
-            const command = document.getElementById('one-liner-command').textContent;
-            navigator.clipboard.writeText(command).then(() => {
-                alert('✅ Command copied! Paste in terminal to deploy.\n\n⏱️ Note: After pasting the command, you\'ll need to enter your Raspberry Pi password. Wait a few seconds for the prompt.');
-            }).catch(() => {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = command;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                alert('✅ Command copied! Paste in terminal to deploy.\n\n⏱️ Note: After pasting the command, you\'ll need to enter your Raspberry Pi password. Wait a few seconds for the prompt.');
-            });
-        }
 
         function downloadDeployScript() {
             const script = `#!/bin/bash
@@ -432,37 +286,7 @@ echo ""
 echo -e "\${BLUE}🌐 Web UI:\${NC} http://\${RPI_IP}:\${RPI_PORT}"
 echo -e "\${BLUE}📡 API:\${NC}    http://\${RPI_IP}:\${RPI_PORT}/beacon"
 echo ""
-
-# Open Web UI automatically in default browser
-WEB_URL="http://\${RPI_IP}:\${RPI_PORT}"
-echo -e "\${GREEN}🚀 Opening Web UI automatically in 3 seconds...\${NC}"
-echo ""
-sleep 1
-echo "3..."
-sleep 1
-echo "2..."
-sleep 1
-echo "1..."
-
-if command -v open &> /dev/null; then
-    # macOS
-    open "\${WEB_URL}"
-    echo -e "\${GREEN}✅ Web UI opened in your browser!\${NC}"
-elif command -v xdg-open &> /dev/null; then
-    # Linux
-    xdg-open "\${WEB_URL}"
-    echo -e "\${GREEN}✅ Web UI opened in your browser!\${NC}"
-elif command -v start &> /dev/null; then
-    # Windows Git Bash
-    start "\${WEB_URL}"
-    echo -e "\${GREEN}✅ Web UI opened in your browser!\${NC}"
-else
-    echo -e "\${YELLOW}⚠️  Please manually open: \${WEB_URL}\${NC}"
-fi
-
-echo ""
-echo -e "\${GREEN}✅ Ready to broadcast beacons!\${NC}"
-echo ""
+echo -e "\${GREEN}✅ Ready to use!\${NC}"
 `;
 
             downloadFile('deploy.sh', script);
