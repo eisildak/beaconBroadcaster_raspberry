@@ -36,9 +36,53 @@
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #2fb67e 0%, #22c55e 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(47, 182, 126, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out, slideOut 0.3s ease-in 2.7s;
+            opacity: 0;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen antialiased">
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    
     <div class="container mx-auto px-4 py-12 max-w-2xl">
         <div class="hootsuite-dark rounded-2xl card-shadow overflow-hidden border border-slate-700">
             <!-- Header -->
@@ -80,18 +124,6 @@
                                placeholder="e.g., pi"
                                class="input-field w-full">
                         <p class="mt-1 text-sm text-slate-500">The username you use to SSH into your Raspberry Pi</p>
-                    </div>
-
-                    <!-- SSH Password -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">
-                            SSH Password *
-                        </label>
-                        <input type="password" id="rpi-password" required
-                               value=""
-                               placeholder="Your SSH password"
-                               class="input-field w-full">
-                        <p class="mt-1 text-sm text-slate-500">Password for SSH connection</p>
                     </div>
 
                     <!-- Project Directory -->
@@ -143,6 +175,26 @@
                 <!-- Instructions -->
                 <div class="bg-slate-800/50 rounded-lg p-6 mb-6 border border-slate-700">
                     <h3 class="font-bold text-lg mb-3 text-slate-200">📋 Installation Steps</h3>
+                    
+                    <!-- Quick Deploy Option -->
+                    <div class="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/30 rounded-lg p-4 mb-4">
+                        <h4 class="font-bold text-green-400 mb-2">⚡ Quick Deploy (One-Line Installation)</h4>
+                        <p class="text-sm text-slate-300 mb-3">Copy and paste this command in your terminal:</p>
+                        <div class="relative">
+                            <pre id="quick-deploy-cmd" class="bg-slate-900 p-3 rounded text-xs text-green-300 overflow-x-auto font-mono"></pre>
+                            <button onclick="copyQuickDeploy()" class="absolute top-2 right-2 bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">✅ Automatically downloads files from GitHub and starts the service</p>
+                    </div>
+                    
+                    <div class="text-center my-4 text-slate-500">
+                        <span class="bg-slate-800 px-4 py-1 rounded-full text-sm">OR</span>
+                    </div>
+                    
+                    <!-- Manual Deploy Option -->
+                    <h4 class="font-bold text-blue-400 mb-3">📦 Manual Deploy</h4>
                     <ol class="space-y-3 text-sm text-slate-300">
                         <li class="flex items-start gap-2">
                             <span class="font-bold text-blue-400 min-w-6">1.</span>
@@ -197,7 +249,6 @@
             config = {
                 ip: document.getElementById('rpi-ip').value.trim(),
                 user: document.getElementById('rpi-user').value.trim(),
-                password: document.getElementById('rpi-password').value,
                 dir: document.getElementById('rpi-dir').value.trim(),
                 port: document.getElementById('rpi-port').value.trim()
             };
@@ -205,10 +256,45 @@
             // Show result section
             document.getElementById('result-section').classList.remove('hidden');
             document.getElementById('web-url').textContent = `http://${config.ip}:${config.port}`;
+            
+            // Generate quick deploy command
+            const quickDeployCmd = `ssh ${config.user}@${config.ip} "mkdir -p ${config.dir} && curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/simulate_beacon.py > ${config.dir}/simulate_beacon.py && curl -sL https://raw.githubusercontent.com/eisildak/beaconBroadcaster_raspberry/main/raspberry-pi-web-ui/index.html > ${config.dir}/index.html && cd ${config.dir} && screen -X -S beacon_simulator quit 2>/dev/null; chmod +x run_detached.sh 2>/dev/null; nohup python3 simulate_beacon.py --port ${config.port} > /dev/null 2>&1 &" && sleep 3 && echo "✅ Deployment complete! Opening Web UI..." && (open http://${config.ip}:${config.port} 2>/dev/null || xdg-open http://${config.ip}:${config.port} 2>/dev/null || start http://${config.ip}:${config.port} 2>/dev/null)`;
+            document.getElementById('quick-deploy-cmd').textContent = quickDeployCmd;
 
             // Scroll to result
             document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
         });
+        
+        function showToast(message, icon = '✅') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <span style="font-size: 24px;">${icon}</span>
+                <span>${message}</span>
+            `;
+            document.getElementById('toast-container').appendChild(toast);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        function copyQuickDeploy() {
+            const cmd = document.getElementById('quick-deploy-cmd').textContent;
+            navigator.clipboard.writeText(cmd).then(() => {
+                showToast('Command copied to clipboard!', '📋');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = cmd;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('Command copied to clipboard!', '📋');
+            });
+        }
 
         function downloadDeployScript() {
             const script = `#!/bin/bash
